@@ -298,7 +298,7 @@ install(
 
 install(
   DIRECTORY
-  include/${PROJECT_NAME_LOWERCASE}
+  include
   DESTINATION
   include
 )
