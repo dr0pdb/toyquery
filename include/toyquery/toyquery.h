@@ -1,8 +1,7 @@
 #ifndef TOYQUERY_H
 #define TOYQUERY_H
 
-namespace toyquery
-{
+namespace toyquery {
   int add(int, int);
 }
 
