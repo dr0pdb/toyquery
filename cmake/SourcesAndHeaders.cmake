@@ -8,7 +8,7 @@ set(exe_sources
 )
 
 set(headers
-    include/toyquery/toyquery.h
+    include/toyquery.h
 )
 
 set(test_sources

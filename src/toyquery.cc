@@ -1,4 +1,4 @@
-#include "toyquery/toyquery.h"
+#include "toyquery.h"
 
 int toyquery::add(int a, int b) {
   return a + b;
