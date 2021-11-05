@@ -1,4 +1,4 @@
-[![Actions Status](https://github.com/dr0pdb/toy-query/actions/workflows/ubuntu.yml/badge.svg)](https://github.com/dr0pdb/toy-query/actions/workflows/ubuntu.yml)
+[![Actions Status](https://github.com/dr0pdb/toyquery/actions/workflows/ubuntu.yml/badge.svg)](https://github.com/dr0pdb/toyquery/actions/workflows/ubuntu.yml)
 [![codecov](https://codecov.io/gh/dr0pdb/toyquery/branch/main/graph/badge.svg)](https://codecov.io/gh/dr0pdb/toyquery)
 
 # Toyquery
