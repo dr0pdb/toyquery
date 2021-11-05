@@ -1,16 +1,16 @@
 set(sources
-    src/tmp.cpp
+  src/toyquery.cc
 )
 
 set(exe_sources
-		src/main.cpp
+		src/main.cc
 		${sources}
 )
 
 set(headers
-    include/project/tmp.hpp
+    include/toyquery/toyquery.h
 )
 
 set(test_sources
-  src/tmp_test.cpp
+  src/toyquery_test.cc
 )
