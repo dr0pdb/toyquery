@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 3.15)
 #
 
 project(
-  "Toyquery"
+  Toyquery
   VERSION 0.1.0
   LANGUAGES CXX
 )
@@ -155,6 +155,15 @@ include(cmake/Doxygen.cmake)
 #
 # Model project dependencies
 #
+
+# Install Arrow
+find_package(Arrow)
+target_link_libraries(
+  ${PROJECT_NAME}
+  PRIVATE
+    arrow_shared
+)
+verbose_message("Installed Apache Arrow version ${ARROW_VERSION}.\n")
 
 # Identify and link with the specific "packages" the project uses
 #find_package(package_name package_version REQUIRED package_type [other_options])
