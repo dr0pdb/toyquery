@@ -2,7 +2,7 @@
 
 #include <gtest/gtest.h>
 
-TEST(TmpAddTest, CheckValues) {
+TEST(ToyqueryAddTest, CheckValues) {
   ASSERT_EQ(toyquery::add(1, 2), 3);
   EXPECT_TRUE(true);
 }
