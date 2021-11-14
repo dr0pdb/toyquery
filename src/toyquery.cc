@@ -1,5 +1,9 @@
 #include "toyquery.h"
 
-int toyquery::add(int a, int b) {
+namespace toyquery {
+
+int add(int a, int b) {
   return a + b;
 }
+
+}  // namespace toyquery

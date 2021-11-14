@@ -8,6 +8,10 @@ set(exe_sources
 )
 
 set(headers
+    include/common/iterator.h
+    include/common/macros.h
+    include/datasource/datasource.h
+    include/datasource/record_batch_iterator.h
     include/toyquery.h
 )
 
