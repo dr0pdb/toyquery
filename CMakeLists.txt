@@ -156,14 +156,20 @@ include(cmake/Doxygen.cmake)
 # Model project dependencies
 #
 
-# Install Arrow
+add_subdirectory(ext/abseil-cpp)
 find_package(Arrow)
+
 target_link_libraries(
   ${PROJECT_NAME}
   PRIVATE
+    absl::base 
+    absl::synchronization 
+    absl::strings  
     arrow_shared
 )
+
 verbose_message("Installed Apache Arrow version ${ARROW_VERSION}.\n")
+verbose_message("Installed project dependencies\n")
 
 # Identify and link with the specific "packages" the project uses
 #find_package(package_name package_version REQUIRED package_type [other_options])
