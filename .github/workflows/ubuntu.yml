@@ -25,11 +25,12 @@ jobs:
           path: ${{ github.workspace }}/${{ env.INSTALL_LOCATION }}
           key: ${{ runner.os }}-dependencies
 
-      - name: install Abseil-cpp
+      - name: setup Abseil
         if: ${{ steps.cache.output.cache-hit != 'true' }}
         run: |
           mkdir ext
-          git submodule add https://github.com/abseil/abseil-cpp ext/
+          cd ext
+          git clone https://github.com/abseil/abseil-cpp --branch lts_2021_11_02
 
       - name: install GoogleTest
         if: ${{ steps.cache.output.cache-hit != 'true' }}
