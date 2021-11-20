@@ -163,8 +163,8 @@ target_link_libraries(
   ${PROJECT_NAME}
   PRIVATE
     absl::base 
-    absl::synchronization 
-    absl::strings  
+    absl::strings
+    absl::status  
     arrow_shared
 )
 
@@ -277,17 +277,6 @@ install(
   include
   PUBLIC_HEADER DESTINATION
   include
-)
-
-install(
-  EXPORT
-  ${PROJECT_NAME}Targets
-  FILE
-  ${PROJECT_NAME}Targets.cmake
-  NAMESPACE
-  ${PROJECT_NAME}::
-  DESTINATION
-  ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
 )
 
 #

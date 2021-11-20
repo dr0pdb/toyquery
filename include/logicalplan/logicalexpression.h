@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 
+#include "absl/status/statusor.h"
 #include "arrow/api.h"
 #include "common/macros.h"
 #include "logicalplan.h"
@@ -29,9 +30,9 @@ class LogicalExpression {
    * logical plan.
    *
    * @param input: the logical plan on which this expression will be evaluated.
-   * @return std::shared_ptr<arrow::Field>: the metadata information of the produced value.
+   * @return absl::StatusOr<std::shared_ptr<arrow::Field>>: the metadata information of the produced value.
    */
-  virtual std::shared_ptr<arrow::Field> ToField(LogicalPlan input) = 0;
+  virtual absl::StatusOr<std::shared_ptr<arrow::Field>> ToField(LogicalPlan input) = 0;
 
   /**
    * @brief Get string representation to print for debugging.
@@ -59,9 +60,9 @@ class ColumnExpression : public LogicalExpression {
    * logical plan.
    *
    * @param input: the logical plan on which this expression will be evaluated.
-   * @return std::shared_ptr<arrow::Field>: the metadata information of the produced value.
+   * @return absl::StatusOr<std::shared_ptr<arrow::Field>>: the metadata information of the produced value.
    */
-  std::shared_ptr<arrow::Field> ToField(LogicalPlan input) override;
+  absl::StatusOr<std::shared_ptr<arrow::Field>> ToField(LogicalPlan input) override;
 
   /**
    * @brief Get string representation to print for debugging.
