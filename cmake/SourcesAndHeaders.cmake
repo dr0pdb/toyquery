@@ -11,6 +11,7 @@ set(headers
     include/common/debug.h
     include/common/iterator.h
     include/common/macros.h
+    include/dataframe/dataframe.h
     include/datasource/datasource.h
     include/datasource/record_batch_iterator.h
     include/logicalplan/logicalexpression.h
