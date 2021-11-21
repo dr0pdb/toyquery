@@ -183,6 +183,36 @@ class Cast : public LogicalExpression {
 };
 
 /**
+ * @brief An alias logical expression.
+ *
+ * Format: expr AS alias
+ */
+class Alias : public LogicalExpression {
+ public:
+  Alias(std::shared_ptr<LogicalExpression> expr, std::string alias);
+  ~Alias();
+
+  /**
+   * @copydoc LogicalExpression::ToField()
+   *
+   * The return type of the alias expression is that same as that of the input expression.
+   */
+  absl::StatusOr<std::shared_ptr<arrow::Field>> ToField(std::shared_ptr<LogicalPlan> input) override {
+    ASSIGN_OR_RETURN(std::shared_ptr<arrow::Field> field, left_->ToField(input));
+    return std::make_shared<arrow::Field>(alias_, field->type());
+  }
+
+  /**
+   * @copydoc LogicalExpression::ToString()
+   */
+  std::string ToString() override { return "todo"; }
+
+ protected:
+  std::shared_ptr<LogicalExpression> expr_;
+  std::string alias_;
+};
+
+/**
  * @brief The base class for a unary expression.
  */
 class UnaryExpression : public LogicalExpression {
@@ -351,6 +381,76 @@ class LtEq : public BooleanBinaryExpression {
       : BooleanBinaryExpression("lteq", "<=", left, right) { }
 
   ~LtEq();
+};
+
+/**
+ * @brief The base class for a binary expression that is the result of a mathematical operation.
+ */
+class MathBinaryExpression : public BinaryExpression {
+ public:
+  MathBinaryExpression(
+      std::string name,
+      std::string op,
+      std::shared_ptr<LogicalExpression> left,
+      std::shared_ptr<LogicalExpression> right)
+      : BinaryExpression(name, op, left, right) { }
+
+  ~MathBinaryExpression();
+
+  /**
+   * @copydoc LogicalExpression::ToField()
+   *
+   * The type of the result of a math expression is the same as that of it's left and right parameters.
+   */
+  absl::StatusOr<std::shared_ptr<arrow::Field>> ToField(std::shared_ptr<LogicalPlan> input) override {
+    ASSIGN_OR_RETURN(std::shared_ptr<arrow::Field> field, left_->ToField(input));
+    return std::make_shared<arrow::Field>(this->name_, field->type());
+  }
+};
+
+/**
+ * @brief The addition logical expression.
+ */
+class Add : public MathBinaryExpression {
+ public:
+  Add(std::shared_ptr<LogicalExpression> left, std::shared_ptr<LogicalExpression> right)
+      : MathBinaryExpression("add", "+", left, right) { }
+};
+
+/**
+ * @brief The subtraction logical expression.
+ */
+class Subtract : public MathBinaryExpression {
+ public:
+  Subtract(std::shared_ptr<LogicalExpression> left, std::shared_ptr<LogicalExpression> right)
+      : MathBinaryExpression("subtract", "-", left, right) { }
+};
+
+/**
+ * @brief The multiplication logical expression.
+ */
+class Multiply : public MathBinaryExpression {
+ public:
+  Multiply(std::shared_ptr<LogicalExpression> left, std::shared_ptr<LogicalExpression> right)
+      : MathBinaryExpression("multiply", "*", left, right) { }
+};
+
+/**
+ * @brief The division logical expression.
+ */
+class Divide : public MathBinaryExpression {
+ public:
+  Divide(std::shared_ptr<LogicalExpression> left, std::shared_ptr<LogicalExpression> right)
+      : MathBinaryExpression("divide", "/", left, right) { }
+};
+
+/**
+ * @brief The modulus logical expression.
+ */
+class Modulus : public MathBinaryExpression {
+ public:
+  Modulus(std::shared_ptr<LogicalExpression> left, std::shared_ptr<LogicalExpression> right)
+      : MathBinaryExpression("modulus", "%", left, right) { }
 };
 
 }  // namespace logicalplan
