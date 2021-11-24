@@ -10,7 +10,7 @@ template<typename Item>
 class Iterator {
  public:
   Iterator() = default;
-  ~Iterator() = default;
+  virtual ~Iterator();
 
   /**
    * @brief Get the next item from the iterator.

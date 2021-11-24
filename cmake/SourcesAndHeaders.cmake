@@ -1,4 +1,5 @@
 set(sources
+  src/logicalplan/logicalplan.cc
   src/toyquery.cc
 )
 
@@ -8,6 +9,7 @@ set(exe_sources
 )
 
 set(headers
+    include/common/arrow.h
     include/common/debug.h
     include/common/iterator.h
     include/common/macros.h
