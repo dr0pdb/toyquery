@@ -164,7 +164,7 @@ class LiteralDouble : public LogicalExpression {
  */
 class Cast : public LogicalExpression {
  public:
-  Cast(std::shared_ptr<LogicalExpression> expr, std::shared_ptr<arrow::DataType> type);
+  Cast(std::shared_ptr<LogicalExpression> expr, std::shared_ptr<arrow::DataType> type) : expr_{ expr }, type_{ type } {};
   ~Cast();
 
   /**
@@ -189,7 +189,9 @@ class Cast : public LogicalExpression {
  */
 class Alias : public LogicalExpression {
  public:
-  Alias(std::shared_ptr<LogicalExpression> expr, std::string alias);
+  Alias(std::shared_ptr<LogicalExpression> expr, std::string alias)
+      : expr_{ std::move(expr) },
+        alias_{ std::move(alias) } { }
   ~Alias();
 
   /**
@@ -217,7 +219,11 @@ class Alias : public LogicalExpression {
  */
 class UnaryExpression : public LogicalExpression {
  public:
-  UnaryExpression(std::string name, std::string op, std::shared_ptr<LogicalExpression> expr);
+  UnaryExpression(std::string name, std::string op, std::shared_ptr<LogicalExpression> expr)
+      : name_{ std::move(name) },
+        op_{ std::move(op) },
+        expr_{ std::move(expr) } {};
+
   ~UnaryExpression();
 
   /**
@@ -257,7 +263,11 @@ class BinaryExpression : public LogicalExpression {
       std::string name,
       std::string op,
       std::shared_ptr<LogicalExpression> left,
-      std::shared_ptr<LogicalExpression> right);
+      std::shared_ptr<LogicalExpression> right)
+      : name_{ std::move(name) },
+        op_{ std::move(op) },
+        left_{ std::move(left) },
+        right_{ std::move(right) } {};
   ~BinaryExpression();
 
   /**
@@ -451,6 +461,72 @@ class Modulus : public MathBinaryExpression {
  public:
   Modulus(std::shared_ptr<LogicalExpression> left, std::shared_ptr<LogicalExpression> right)
       : MathBinaryExpression("modulus", "%", left, right) { }
+};
+
+/**
+ * @brief The base class for an aggregate expression.
+ */
+class AggregateExpression : public LogicalExpression {
+ public:
+  AggregateExpression(std::string name, std::shared_ptr<LogicalExpression> expr)
+      : name_{ std::move(name) },
+        expr_{ std::move(expr) } { }
+
+  ~AggregateExpression();
+
+  /**
+   * @copydoc LogicalExpression::ToField()
+   *
+   * The type of the result of an aggregate expression is the type of expr on the given input.
+   */
+  absl::StatusOr<std::shared_ptr<arrow::Field>> ToField(std::shared_ptr<LogicalPlan> input) override {
+    ASSIGN_OR_RETURN(std::shared_ptr<arrow::Field> field, expr_->ToField(input));
+    return std::make_shared<arrow::Field>(this->name_, field->type());
+  }
+
+ protected:
+  std::string name_;
+  std::shared_ptr<LogicalExpression> expr_;
+};
+
+/**
+ * @brief The multiplication logical expression.
+ */
+class Sum : public AggregateExpression {
+ public:
+  Sum(std::shared_ptr<LogicalExpression> input) : AggregateExpression("sum", input) { }
+};
+
+/**
+ * @brief The MIN aggregate logical expression.
+ */
+class Min : public AggregateExpression {
+ public:
+  Min(std::shared_ptr<LogicalExpression> input) : AggregateExpression("min", input) { }
+};
+
+/**
+ * @brief The MAX aggregate logical expression.
+ */
+class Max : public AggregateExpression {
+ public:
+  Max(std::shared_ptr<LogicalExpression> input) : AggregateExpression("max", input) { }
+};
+
+/**
+ * @brief The AVG aggregate logical expression.
+ */
+class Avg : public AggregateExpression {
+ public:
+  Avg(std::shared_ptr<LogicalExpression> input) : AggregateExpression("avg", input) { }
+};
+
+/**
+ * @brief The COUNT aggregate logical expression.
+ */
+class Count : public AggregateExpression {
+ public:
+  Count(std::shared_ptr<LogicalExpression> input) : AggregateExpression("count", input) { }
 };
 
 }  // namespace logicalplan
