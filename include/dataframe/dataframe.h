@@ -1,11 +1,18 @@
 #ifndef DATAFRAME_DATAFRAME_H
 #define DATAFRAME_DATAFRAME_H
 
+#include <vector>
+
 #include "arrow/api.h"
 #include "common/macros.h"
+#include "logicalplan/logicalexpression.h"
+#include "logicalplan/logicalplan.h"
 
 namespace toyquery {
 namespace dataframe {
+
+using ::toyquery::logicalplan::LogicalExpression;
+using ::toyquery::logicalplan::LogicalPlan;
 
 /**
  * @brief An interface to easily create logical plans.
@@ -14,9 +21,51 @@ namespace dataframe {
 class DataFrame {
  public:
   DataFrame() = default;
-  ~DataFrame() = default;
+  virtual ~DataFrame() = 0;
+
+  /**
+   * @brief Apply a projection
+   *
+   * @param expr the projection expressions
+   * @return std::shared_ptr<DataFrame> the dataframe with projection applied
+   */
+  virtual std::shared_ptr<DataFrame> Project(std::vector<std::shared_ptr<LogicalExpression>> expr) = 0;
+
+  /**
+   * @brief Apply a filter on the dataframe
+   *
+   * @param expr the filter expression
+   * @return std::shared_ptr<DataFrame> the dataframe with filter applied
+   */
+  virtual std::shared_ptr<DataFrame> Filter(std::shared_ptr<LogicalExpression> expr) = 0;
+
+  /**
+   * @brief Apply aggregation on the dataframe
+   *
+   * @param group_by the grouping expressions
+   * @param aggregate_expr the aggregation expressions
+   * @return std::shared_ptr<DataFrame> the dataframe after applying the aggregation plan
+   */
+  virtual std::shared_ptr<DataFrame> Aggregate(
+      std::vector<std::shared_ptr<LogicalExpression>> group_by,
+      std::vector<std::shared_ptr<LogicalExpression>> aggregate_expr) = 0;
+
+  /**
+   * @brief Get the schema of the dataframe
+   *
+   * @return std::shared_ptr<arrow::Schema> the schema of the dataframe
+   */
+  virtual std::shared_ptr<arrow::Schema> Schema() = 0;
+
+  /**
+   * @brief Get the logical plan of the dataframe
+   *
+   * @return std::shared_ptr<LogicalPlan> the logical plan
+   */
+  virtual std::shared_ptr<LogicalPlan> LogicalPlan() = 0;
 
  private:
+  DISALLOW_COPY_AND_ASSIGN(DataFrame);
 };
 
 }  // namespace dataframe
