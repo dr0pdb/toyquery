@@ -7,10 +7,11 @@
 #include "absl/status/statusor.h"
 #include "arrow/api.h"
 #include "common/macros.h"
-#include "logicalplan.h"
 
 namespace toyquery {
 namespace logicalplan {
+
+class LogicalPlan;
 
 /**
  * @brief Base class for all logical expressions.
@@ -21,7 +22,7 @@ namespace logicalplan {
 class LogicalExpression {
  public:
   LogicalExpression() = default;
-  ~LogicalExpression();
+  virtual ~LogicalExpression() = 0;
 
   /**
    * @brief Get arrow::Field of value when evaluating this expression against the input.
@@ -200,7 +201,7 @@ class Alias : public LogicalExpression {
    * The return type of the alias expression is that same as that of the input expression.
    */
   absl::StatusOr<std::shared_ptr<arrow::Field>> ToField(std::shared_ptr<LogicalPlan> input) override {
-    ASSIGN_OR_RETURN(std::shared_ptr<arrow::Field> field, left_->ToField(input));
+    ASSIGN_OR_RETURN(std::shared_ptr<arrow::Field> field, expr_->ToField(input));
     return std::make_shared<arrow::Field>(alias_, field->type());
   }
 
@@ -249,8 +250,7 @@ class Not : public UnaryExpression {
    * @copydoc LogicalExpression::ToField()
    */
   absl::StatusOr<std::shared_ptr<arrow::Field>> ToField(std::shared_ptr<LogicalPlan> input) override {
-    std::shared_ptr<arrow::DataType> boolean_type = std::make_shared<arrow::DataType>(arrow::Type::BOOL);
-    return std::make_shared<arrow::Field>(this->name_, std::move(boolean_type));
+    return std::make_shared<arrow::Field>(this->name_, arrow::boolean());
   }
 };
 
@@ -300,8 +300,7 @@ class BooleanBinaryExpression : public BinaryExpression {
    * @copydoc LogicalExpression::ToField()
    */
   absl::StatusOr<std::shared_ptr<arrow::Field>> ToField(std::shared_ptr<LogicalPlan> input) override {
-    std::shared_ptr<arrow::DataType> boolean_type = std::make_shared<arrow::DataType>(arrow::Type::BOOL);
-    return std::make_shared<arrow::Field>(this->name_, std::move(boolean_type));
+    return std::make_shared<arrow::Field>(this->name_, arrow::boolean());
   }
 };
 
