@@ -19,6 +19,7 @@ set(headers
     include/datasource/datasource.h
     include/datasource/record_batch_iterator.h
     include/execution/execution_context.h
+    include/physicalplan/physicalplan.h
     include/logicalplan/logicalexpression.h
     include/logicalplan/logicalplan.h
     include/toyquery.h
