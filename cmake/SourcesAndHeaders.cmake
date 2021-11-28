@@ -1,4 +1,6 @@
 set(sources
+  src/dataframe/dataframe.cc
+  src/execution/execution_context.cc
   src/logicalplan/logicalplan.cc
   src/toyquery.cc
 )
@@ -16,6 +18,7 @@ set(headers
     include/dataframe/dataframe.h
     include/datasource/datasource.h
     include/datasource/record_batch_iterator.h
+    include/execution/execution_context.h
     include/logicalplan/logicalexpression.h
     include/logicalplan/logicalplan.h
     include/toyquery.h

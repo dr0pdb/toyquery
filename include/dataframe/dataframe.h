@@ -55,17 +55,54 @@ class DataFrame {
    *
    * @return std::shared_ptr<arrow::Schema> the schema of the dataframe
    */
-  virtual std::shared_ptr<arrow::Schema> Schema() = 0;
+  virtual absl::StatusOr<std::shared_ptr<arrow::Schema>> GetSchema() = 0;
 
   /**
    * @brief Get the logical plan of the dataframe
    *
    * @return std::shared_ptr<LogicalPlan> the logical plan
    */
-  virtual std::shared_ptr<LogicalPlan> LogicalPlan() = 0;
+  virtual std::shared_ptr<LogicalPlan> GetLogicalPlan() = 0;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(DataFrame);
+};
+
+class DataFrameImpl : public DataFrame {
+ public:
+  DataFrameImpl(std::shared_ptr<LogicalPlan> plan) : plan_{ std::move(plan) } { }
+
+  ~DataFrameImpl() override = default;
+
+  /**
+   * @copydoc DataFrame::Project
+   */
+  std::shared_ptr<DataFrame> Project(std::vector<std::shared_ptr<LogicalExpression>> expr) override;
+
+  /**
+   * @copydoc DataFrame::Filter
+   */
+  std::shared_ptr<DataFrame> Filter(std::shared_ptr<LogicalExpression> expr) override;
+
+  /**
+   * @copydoc DataFrame::Aggregate
+   */
+  std::shared_ptr<DataFrame> Aggregate(
+      std::vector<std::shared_ptr<LogicalExpression>> group_by,
+      std::vector<std::shared_ptr<LogicalExpression>> aggregate_expr) override;
+
+  /**
+   * @copydoc DataFrame::GetSchema
+   */
+  absl::StatusOr<std::shared_ptr<arrow::Schema>> GetSchema() override;
+
+  /**
+   * @copydoc DataFrame::GetLogicalPlan
+   */
+  std::shared_ptr<LogicalPlan> GetLogicalPlan() override;
+
+ private:
+  std::shared_ptr<LogicalPlan> plan_;
 };
 
 }  // namespace dataframe
