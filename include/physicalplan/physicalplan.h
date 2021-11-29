@@ -48,10 +48,18 @@ class PhysicalPlan {
   /**
    * @brief Get the next record batch.
    *
-   * @return absl::StatusOr<arrow::RecordBatch>: the next record batch if successful. Error status otherwise.
+   * @return absl::StatusOr<std::shared_ptr<arrow::RecordBatch>>: the next record batch if successful. Error status
+   * otherwise.
    * @note The absl::NotFoundError indicates that all batches have been emitted.
    */
-  virtual absl::StatusOr<arrow::RecordBatch> Next() = 0;
+  virtual absl::StatusOr<std::shared_ptr<arrow::RecordBatch>> Next() = 0;
+
+  /**
+   * @brief Get string representation to print for debugging.
+   *
+   * @return std::string: the string representation of the expression.
+   */
+  virtual std::string ToString();
 
  private:
   DISALLOW_COPY_AND_ASSIGN(PhysicalPlan);
