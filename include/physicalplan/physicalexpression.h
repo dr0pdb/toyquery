@@ -5,8 +5,10 @@
 #include <vector>
 
 #include "absl/status/statusor.h"
+#include "absl/strings/string_view.h"
 #include "arrow/api.h"
 #include "common/macros.h"
+#include "common/status.h"
 
 namespace toyquery {
 namespace physicalplan {
@@ -130,6 +132,100 @@ class LiteralString : public PhysicalExpression {
 
  private:
   std::string val_;
+};
+
+/**
+ * @brief A common class for boolean expressions.
+ *
+ */
+class BooleanExpression : public PhysicalExpression {
+ public:
+  BooleanExpression(std::shared_ptr<PhysicalExpression> left, std::shared_ptr<PhysicalExpression> right)
+      : left_{ left },
+        right_{ right } { }
+
+  /**
+   * @copydoc PhysicalExpression::Evaluate()
+   */
+  absl::StatusOr<std::shared_ptr<arrow::Array>> Evaluate(const std::shared_ptr<arrow::RecordBatch> input) override;
+
+  /**
+   * @brief Compare two arrow::Array using the boolean expression.
+   *
+   * @param left: the left operand
+   * @param right: the right operand
+   * @return absl::StatusOr<std::shared_ptr<arrow::Array>>: the resulting expression arrow::Array
+   */
+  absl::StatusOr<std::shared_ptr<arrow::Array>> Compare(
+      const std::shared_ptr<arrow::Array> left,
+      const std::shared_ptr<arrow::Array> right);
+
+  /**
+   * @brief Evaluate the expression on two scalers.
+   *
+   * @param left the left operand
+   * @param right the right operand
+   * @return absl::StatusOr<bool>: the resulting boolean
+   */
+  virtual absl::StatusOr<bool> EvaluateBooleanExpression(
+      const std::shared_ptr<arrow::Scalar> left,
+      const std::shared_ptr<arrow::Scalar> right,
+      const std::shared_ptr<arrow::DataType> arrowType) = 0;
+
+ private:
+  std::shared_ptr<PhysicalExpression> left_;
+  std::shared_ptr<PhysicalExpression> right_;
+};
+
+/**
+ * @brief The equality expression.
+ *
+ */
+class EqExpression : public BooleanExpression {
+ public:
+  EqExpression(std::shared_ptr<PhysicalExpression> left, std::shared_ptr<PhysicalExpression> right)
+      : BooleanExpression(left, right) { }
+
+  /**
+   * @copydoc BooleanExpression::EvaluateBooleanExpression
+   */
+  absl::StatusOr<bool> EvaluateBooleanExpression(
+      const std::shared_ptr<arrow::Scalar> left,
+      const std::shared_ptr<arrow::Scalar> right,
+      const std::shared_ptr<arrow::DataType> arrowType) override;
+
+ private:
+};
+
+/**
+ * @brief A common class for binary expressions.
+ *
+ */
+class BinaryExpression : public PhysicalExpression {
+ public:
+  BinaryExpression(std::shared_ptr<PhysicalExpression> left, std::shared_ptr<PhysicalExpression> right)
+      : left_{ left },
+        right_{ right } { }
+
+  /**
+   * @copydoc PhysicalExpression::Evaluate()
+   */
+  absl::StatusOr<std::shared_ptr<arrow::Array>> Evaluate(const std::shared_ptr<arrow::RecordBatch> input) override;
+
+  /**
+   * @brief Evaluate the expression on two arrow::Array.
+   *
+   * @param left the left operand
+   * @param right the right operand
+   * @return absl::StatusOr<std::shared_ptr<arrow::Array>>: the resulting arrow::Array
+   */
+  virtual absl::StatusOr<std::shared_ptr<arrow::Array>> EvaluateBinaryExpression(
+      const std::shared_ptr<arrow::Array> left,
+      const std::shared_ptr<arrow::Array> right) = 0;
+
+ private:
+  std::shared_ptr<PhysicalExpression> left_;
+  std::shared_ptr<PhysicalExpression> right_;
 };
 
 }  // namespace physicalplan

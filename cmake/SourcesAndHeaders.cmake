@@ -1,4 +1,5 @@
 set(sources
+  src/common/status.cc
   src/dataframe/dataframe.cc
   src/execution/execution_context.cc
   src/logicalplan/logicalplan.cc
@@ -16,6 +17,7 @@ set(headers
     include/common/debug.h
     include/common/iterator.h
     include/common/macros.h
+    include/common/status.h
     include/dataframe/dataframe.h
     include/datasource/datasource.h
     include/datasource/record_batch_iterator.h
