@@ -66,7 +66,7 @@ class Column : public PhysicalExpression {
 };
 
 /**
- * @brief An expression which always evaluates to a literal long value.
+ * @brief An expression which always evaluates to a literal long (INT64) value.
  *
  */
 class LiteralLong : public PhysicalExpression {
@@ -89,7 +89,7 @@ class LiteralLong : public PhysicalExpression {
 };
 
 /**
- * @brief An expression which always evaluates to a literal double value.
+ * @brief An expression which always evaluates to a literal double (DOUBLE) value.
  *
  */
 class LiteralDouble : public PhysicalExpression {
@@ -112,7 +112,7 @@ class LiteralDouble : public PhysicalExpression {
 };
 
 /**
- * @brief An expression which always evaluates to a literal long value.
+ * @brief An expression which always evaluates to a literal string (STRING) value.
  *
  */
 class LiteralString : public PhysicalExpression {
@@ -169,8 +169,7 @@ class BooleanExpression : public PhysicalExpression {
    */
   virtual absl::StatusOr<bool> EvaluateBooleanExpression(
       const std::shared_ptr<arrow::Scalar> left,
-      const std::shared_ptr<arrow::Scalar> right,
-      const std::shared_ptr<arrow::DataType> arrowType) = 0;
+      const std::shared_ptr<arrow::Scalar> right) = 0;
 
  private:
   std::shared_ptr<PhysicalExpression> left_;
@@ -191,8 +190,140 @@ class EqExpression : public BooleanExpression {
    */
   absl::StatusOr<bool> EvaluateBooleanExpression(
       const std::shared_ptr<arrow::Scalar> left,
-      const std::shared_ptr<arrow::Scalar> right,
-      const std::shared_ptr<arrow::DataType> arrowType) override;
+      const std::shared_ptr<arrow::Scalar> right) override;
+
+ private:
+};
+
+/**
+ * @brief The inequality expression.
+ *
+ */
+class NeqExpression : public BooleanExpression {
+ public:
+  NeqExpression(std::shared_ptr<PhysicalExpression> left, std::shared_ptr<PhysicalExpression> right)
+      : BooleanExpression(left, right) { }
+
+  /**
+   * @copydoc BooleanExpression::EvaluateBooleanExpression
+   */
+  absl::StatusOr<bool> EvaluateBooleanExpression(
+      const std::shared_ptr<arrow::Scalar> left,
+      const std::shared_ptr<arrow::Scalar> right) override;
+
+ private:
+};
+
+/**
+ * @brief The AND expression.
+ *
+ */
+class AndExpression : public BooleanExpression {
+ public:
+  AndExpression(std::shared_ptr<PhysicalExpression> left, std::shared_ptr<PhysicalExpression> right)
+      : BooleanExpression(left, right) { }
+
+  /**
+   * @copydoc BooleanExpression::EvaluateBooleanExpression
+   */
+  absl::StatusOr<bool> EvaluateBooleanExpression(
+      const std::shared_ptr<arrow::Scalar> left,
+      const std::shared_ptr<arrow::Scalar> right) override;
+
+ private:
+};
+
+/**
+ * @brief The OR expression.
+ *
+ */
+class OrExpression : public BooleanExpression {
+ public:
+  OrExpression(std::shared_ptr<PhysicalExpression> left, std::shared_ptr<PhysicalExpression> right)
+      : BooleanExpression(left, right) { }
+
+  /**
+   * @copydoc BooleanExpression::EvaluateBooleanExpression
+   */
+  absl::StatusOr<bool> EvaluateBooleanExpression(
+      const std::shared_ptr<arrow::Scalar> left,
+      const std::shared_ptr<arrow::Scalar> right) override;
+
+ private:
+};
+
+/**
+ * @brief The LessThan expression.
+ *
+ */
+class LessThanExpression : public BooleanExpression {
+ public:
+  LessThanExpression(std::shared_ptr<PhysicalExpression> left, std::shared_ptr<PhysicalExpression> right)
+      : BooleanExpression(left, right) { }
+
+  /**
+   * @copydoc BooleanExpression::EvaluateBooleanExpression
+   */
+  absl::StatusOr<bool> EvaluateBooleanExpression(
+      const std::shared_ptr<arrow::Scalar> left,
+      const std::shared_ptr<arrow::Scalar> right) override;
+
+ private:
+};
+
+/**
+ * @brief The LessThanEquals expression.
+ *
+ */
+class LessThanEqualsExpression : public BooleanExpression {
+ public:
+  LessThanEqualsExpression(std::shared_ptr<PhysicalExpression> left, std::shared_ptr<PhysicalExpression> right)
+      : BooleanExpression(left, right) { }
+
+  /**
+   * @copydoc BooleanExpression::EvaluateBooleanExpression
+   */
+  absl::StatusOr<bool> EvaluateBooleanExpression(
+      const std::shared_ptr<arrow::Scalar> left,
+      const std::shared_ptr<arrow::Scalar> right) override;
+
+ private:
+};
+
+/**
+ * @brief The GreaterThan expression.
+ *
+ */
+class GreaterThanExpression : public BooleanExpression {
+ public:
+  GreaterThanExpression(std::shared_ptr<PhysicalExpression> left, std::shared_ptr<PhysicalExpression> right)
+      : BooleanExpression(left, right) { }
+
+  /**
+   * @copydoc BooleanExpression::EvaluateBooleanExpression
+   */
+  absl::StatusOr<bool> EvaluateBooleanExpression(
+      const std::shared_ptr<arrow::Scalar> left,
+      const std::shared_ptr<arrow::Scalar> right) override;
+
+ private:
+};
+
+/**
+ * @brief The GreaterThanEquals expression.
+ *
+ */
+class GreaterThanEqualsExpression : public BooleanExpression {
+ public:
+  GreaterThanEqualsExpression(std::shared_ptr<PhysicalExpression> left, std::shared_ptr<PhysicalExpression> right)
+      : BooleanExpression(left, right) { }
+
+  /**
+   * @copydoc BooleanExpression::EvaluateBooleanExpression
+   */
+  absl::StatusOr<bool> EvaluateBooleanExpression(
+      const std::shared_ptr<arrow::Scalar> left,
+      const std::shared_ptr<arrow::Scalar> right) override;
 
  private:
 };
