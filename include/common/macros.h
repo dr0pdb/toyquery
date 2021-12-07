@@ -68,9 +68,13 @@ namespace toyquery {
 #define STATUS_MACROS_IMPL_CONCAT_INNER_(x, y) x##y
 #define STATUS_MACROS_IMPL_CONCAT_(x, y)       STATUS_MACROS_IMPL_CONCAT_INNER_(x, y)
 
-#define CAST_ARROW_SCALER_TO_TYPE_OR_RETURN(lhs, tp, scaler) \
-  CAST_ARROW_SCALER_TO_TYPE_OR_RETURN_IMPL_(                 \
-      CAST_MACROS_IMPL_CONCAT_(casted_scaler, __LINE__), lhs, tp, scaler, "arrow::Scaler type casting error.")
+#define CAST_ARROW_SCALER_TO_TYPE_OR_RETURN(lhs, tp, scaler)                               \
+  CAST_ARROW_SCALER_TO_TYPE_OR_RETURN_IMPL_(                                               \
+      CAST_MACROS_IMPL_CONCAT_(CAST_MACROS_IMPL_CONCAT_(casted_scaler, scaler), __LINE__), \
+      lhs,                                                                                 \
+      tp,                                                                                  \
+      scaler,                                                                              \
+      "arrow::Scaler type casting error.")
 
 #define CAST_ARROW_SCALER_TO_TYPE_OR_RETURN_WITH_MESSAGE(lhs, tp, scaler, msg) \
   CAST_ARROW_SCALER_TO_TYPE_OR_RETURN_IMPL_(CAST_MACROS_IMPL_CONCAT_(casted_scaler, __LINE__), lhs, tp, scaler, msg)
