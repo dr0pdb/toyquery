@@ -359,6 +359,112 @@ class BinaryExpression : public PhysicalExpression {
   std::shared_ptr<PhysicalExpression> right_;
 };
 
+/**
+ * @brief A common class for binary expressions.
+ *
+ */
+class MathExpression : public BinaryExpression {
+ public:
+  MathExpression(std::shared_ptr<PhysicalExpression> left, std::shared_ptr<PhysicalExpression> right)
+      : BinaryExpression(left, right) { }
+
+  /**
+   * @copydoc BinaryExpression::EvaluateBinaryExpression()
+   */
+  absl::StatusOr<std::shared_ptr<arrow::Array>> EvaluateBinaryExpression(
+      const std::shared_ptr<arrow::Array> left,
+      const std::shared_ptr<arrow::Array> right) override;
+
+  /**
+   * @brief Evaluate the math expression on the two scalars
+   *
+   * @param left: the left operand
+   * @param right: the right operand
+   * @return absl::StatusOr<std::shared_ptr<arrow::Scalar>>: the resulting scalar or status.
+   */
+  virtual absl::StatusOr<std::shared_ptr<arrow::Scalar>> EvaluateMathExpression(
+      const std::shared_ptr<arrow::Scalar> left,
+      const std::shared_ptr<arrow::Scalar> right) = 0;
+
+ private:
+};
+
+/**
+ * @brief The Addition expression.
+ *
+ */
+class AddExpression : public MathExpression {
+ public:
+  AddExpression(std::shared_ptr<PhysicalExpression> left, std::shared_ptr<PhysicalExpression> right)
+      : MathExpression(left, right) { }
+
+  /**
+   * @copydoc MathExpression::EvaluateMathExpression
+   */
+  absl::StatusOr<std::shared_ptr<arrow::Scalar>> EvaluateMathExpression(
+      const std::shared_ptr<arrow::Scalar> left,
+      const std::shared_ptr<arrow::Scalar> right) override;
+
+ private:
+};
+
+/**
+ * @brief The Subtraction expression.
+ *
+ */
+class SubtractExpression : public MathExpression {
+ public:
+  SubtractExpression(std::shared_ptr<PhysicalExpression> left, std::shared_ptr<PhysicalExpression> right)
+      : MathExpression(left, right) { }
+
+  /**
+   * @copydoc MathExpression::EvaluateMathExpression
+   */
+  absl::StatusOr<std::shared_ptr<arrow::Scalar>> EvaluateMathExpression(
+      const std::shared_ptr<arrow::Scalar> left,
+      const std::shared_ptr<arrow::Scalar> right) override;
+
+ private:
+};
+
+/**
+ * @brief The multiplication expression.
+ *
+ */
+class MultiplyExpression : public MathExpression {
+ public:
+  MultiplyExpression(std::shared_ptr<PhysicalExpression> left, std::shared_ptr<PhysicalExpression> right)
+      : MathExpression(left, right) { }
+
+  /**
+   * @copydoc MathExpression::EvaluateMathExpression
+   */
+  absl::StatusOr<std::shared_ptr<arrow::Scalar>> EvaluateMathExpression(
+      const std::shared_ptr<arrow::Scalar> left,
+      const std::shared_ptr<arrow::Scalar> right) override;
+
+ private:
+};
+
+/**
+ * @brief The Division expression.
+ *
+ */
+class DivideExpression : public MathExpression {
+ public:
+  DivideExpression(std::shared_ptr<PhysicalExpression> left, std::shared_ptr<PhysicalExpression> right)
+      : MathExpression(left, right) { }
+
+  /**
+   * @copydoc MathExpression::EvaluateMathExpression
+   */
+  absl::StatusOr<std::shared_ptr<arrow::Scalar>> EvaluateMathExpression(
+      const std::shared_ptr<arrow::Scalar> left,
+      const std::shared_ptr<arrow::Scalar> right) override;
+
+ private:
+};
+
 }  // namespace physicalplan
 }  // namespace toyquery
 

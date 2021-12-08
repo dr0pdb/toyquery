@@ -246,5 +246,132 @@ absl::StatusOr<std::shared_ptr<arrow::Array>> BinaryExpression::Evaluate(const s
   return EvaluateBinaryExpression(ll, rr);
 }
 
+absl::StatusOr<std::shared_ptr<arrow::Array>> MathExpression::EvaluateBinaryExpression(
+    const std::shared_ptr<arrow::Array> left,
+    const std::shared_ptr<arrow::Array> right) {
+#define EVALUATE_BINARY_EXPRESSION(builder_type, scaler_type)                                           \
+  builder_type builder;                                                                                 \
+  builder.Reserve(left->length());                                                                      \
+                                                                                                        \
+  for (int i = 0; i < left->length(); i++) {                                                            \
+    auto ls = left->GetScalar(i);                                                                       \
+    auto rs = right->GetScalar(i);                                                                      \
+                                                                                                        \
+    if (!(ls.ok() && rs.ok())) { return absl::InternalError(GetMessageFromResultLeftOrRight(ls, rs)); } \
+                                                                                                        \
+    auto val = EvaluateMathExpression(*ls, *rs);                                                        \
+    if (!val.ok()) { return absl::InternalError(GetMessageFromStatus(val.status())); }                  \
+                                                                                                        \
+    builder.UnsafeAppend(std::static_pointer_cast<scaler_type>(*val)->value);                           \
+  }                                                                                                     \
+                                                                                                        \
+  auto array = builder.Finish();                                                                        \
+  if (!array.ok()) { return absl::InternalError(GetMessageFromResult(array)); }                         \
+  return *array;
+
+  switch (left->type()->id()) {
+    case arrow::Type::INT64: {
+      EVALUATE_BINARY_EXPRESSION(arrow::Int64Builder, arrow::Int64Scalar);
+    }
+    case arrow::Type::DOUBLE: {
+      EVALUATE_BINARY_EXPRESSION(arrow::DoubleBuilder, arrow::DoubleScalar);
+    }
+    default: return absl::InternalError("Unsupported type in math expression.");
+  }
+#undef EVALUATE_BINARY_EXPRESSION
+}
+
+absl::StatusOr<std::shared_ptr<arrow::Scalar>> AddExpression::EvaluateMathExpression(
+    const std::shared_ptr<arrow::Scalar> left,
+    const std::shared_ptr<arrow::Scalar> right) {
+#define ADD_ARROW_SCALER(tp)                                                \
+  CAST_ARROW_SCALER_TO_TYPE_OR_RETURN(auto lv, tp, left);                   \
+  CAST_ARROW_SCALER_TO_TYPE_OR_RETURN(auto rv, tp, right);                  \
+  auto res = arrow::MakeScalar(left->type, lv + rv);                        \
+  if (!res.ok()) { return absl::InternalError(GetMessageFromResult(res)); } \
+  return *res;
+
+  switch (left->type->id()) {
+    case arrow::Type::INT64: {
+      ADD_ARROW_SCALER(arrow::Int64Scalar);
+    }
+    case arrow::Type::DOUBLE: {
+      ADD_ARROW_SCALER(arrow::DoubleScalar);
+    }
+    default: return absl::InternalError("Unsupported type in addition expression.");
+  }
+
+#undef ADD_ARROW_SCALER
+}
+
+absl::StatusOr<std::shared_ptr<arrow::Scalar>> SubtractExpression::EvaluateMathExpression(
+    const std::shared_ptr<arrow::Scalar> left,
+    const std::shared_ptr<arrow::Scalar> right) {
+#define SUBTRACT_ARROW_SCALER(tp)                                           \
+  CAST_ARROW_SCALER_TO_TYPE_OR_RETURN(auto lv, tp, left);                   \
+  CAST_ARROW_SCALER_TO_TYPE_OR_RETURN(auto rv, tp, right);                  \
+  auto res = arrow::MakeScalar(left->type, lv - rv);                        \
+  if (!res.ok()) { return absl::InternalError(GetMessageFromResult(res)); } \
+  return *res;
+
+  switch (left->type->id()) {
+    case arrow::Type::INT64: {
+      SUBTRACT_ARROW_SCALER(arrow::Int64Scalar);
+    }
+    case arrow::Type::DOUBLE: {
+      SUBTRACT_ARROW_SCALER(arrow::DoubleScalar);
+    }
+    default: return absl::InternalError("Unsupported type in subtraction expression.");
+  }
+
+#undef SUBTRACT_ARROW_SCALER
+}
+
+absl::StatusOr<std::shared_ptr<arrow::Scalar>> MultiplyExpression::EvaluateMathExpression(
+    const std::shared_ptr<arrow::Scalar> left,
+    const std::shared_ptr<arrow::Scalar> right) {
+#define MULTIPLY_ARROW_SCALER(tp)                                           \
+  CAST_ARROW_SCALER_TO_TYPE_OR_RETURN(auto lv, tp, left);                   \
+  CAST_ARROW_SCALER_TO_TYPE_OR_RETURN(auto rv, tp, right);                  \
+  auto res = arrow::MakeScalar(left->type, lv * rv);                        \
+  if (!res.ok()) { return absl::InternalError(GetMessageFromResult(res)); } \
+  return *res;
+
+  switch (left->type->id()) {
+    case arrow::Type::INT64: {
+      MULTIPLY_ARROW_SCALER(arrow::Int64Scalar);
+    }
+    case arrow::Type::DOUBLE: {
+      MULTIPLY_ARROW_SCALER(arrow::DoubleScalar);
+    }
+    default: return absl::InternalError("Unsupported type in multiplication expression.");
+  }
+
+#undef MULTIPLY_ARROW_SCALER
+}
+
+absl::StatusOr<std::shared_ptr<arrow::Scalar>> DivideExpression::EvaluateMathExpression(
+    const std::shared_ptr<arrow::Scalar> left,
+    const std::shared_ptr<arrow::Scalar> right) {
+#define DIVIDE_ARROW_SCALER(tp)                                             \
+  CAST_ARROW_SCALER_TO_TYPE_OR_RETURN(auto lv, tp, left);                   \
+  CAST_ARROW_SCALER_TO_TYPE_OR_RETURN(auto rv, tp, right);                  \
+  auto res = arrow::MakeScalar(left->type, lv / rv);                        \
+  if (!res.ok()) { return absl::InternalError(GetMessageFromResult(res)); } \
+  return *res;
+
+  switch (left->type->id()) {
+    case arrow::Type::INT64: {
+      DIVIDE_ARROW_SCALER(arrow::Int64Scalar);
+    }
+    case arrow::Type::DOUBLE: {
+      DIVIDE_ARROW_SCALER(arrow::DoubleScalar);
+    }
+    default: return absl::InternalError("Unsupported type in division expression.");
+  }
+
+#undef DIVIDE_ARROW_SCALER
+}
+
 }  // namespace physicalplan
 }  // namespace toyquery
