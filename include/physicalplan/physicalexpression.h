@@ -465,6 +465,8 @@ class DivideExpression : public MathExpression {
  private:
 };
 
+class AggregationExpression : public PhysicalExpression { };
+
 }  // namespace physicalplan
 }  // namespace toyquery
 

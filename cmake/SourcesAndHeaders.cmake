@@ -3,6 +3,7 @@ set(sources
   src/dataframe/dataframe.cc
   src/execution/execution_context.cc
   src/logicalplan/logicalplan.cc
+  src/physicalplan/accumulator.cc
   src/physicalplan/physicalexpression.cc
   src/toyquery.cc
 )
@@ -22,6 +23,7 @@ set(headers
     include/datasource/datasource.h
     include/datasource/record_batch_iterator.h
     include/execution/execution_context.h
+    include/physicalplan/accumulator.h
     include/physicalplan/physicalexpression.h
     include/physicalplan/physicalplan.h
     include/logicalplan/logicalexpression.h
