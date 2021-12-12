@@ -6,6 +6,7 @@
 
 #include "absl/status/statusor.h"
 #include "absl/strings/string_view.h"
+#include "accumulator.h"
 #include "arrow/api.h"
 #include "common/macros.h"
 #include "common/status.h"
@@ -464,8 +465,6 @@ class DivideExpression : public MathExpression {
 
  private:
 };
-
-class AggregationExpression : public PhysicalExpression { };
 
 }  // namespace physicalplan
 }  // namespace toyquery

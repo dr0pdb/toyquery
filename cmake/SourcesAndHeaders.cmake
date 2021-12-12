@@ -24,6 +24,7 @@ set(headers
     include/datasource/record_batch_iterator.h
     include/execution/execution_context.h
     include/physicalplan/accumulator.h
+    include/physicalplan/aggregationexpression.h
     include/physicalplan/physicalexpression.h
     include/physicalplan/physicalplan.h
     include/logicalplan/logicalexpression.h

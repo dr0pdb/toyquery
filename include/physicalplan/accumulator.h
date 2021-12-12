@@ -59,6 +59,48 @@ class MaxAccumulator : public Accumulator {
   std::shared_ptr<arrow::Scalar> value_{};
 };
 
+/**
+ * @brief Accumulator to calculate the min value among a set of values.
+ *
+ */
+class MinAccumulator : public Accumulator {
+  MinAccumulator() = default;
+
+  /**
+   * @copydoc Accumulator::Accumulate
+   */
+  absl::Status Accumulate(std::shared_ptr<arrow::Scalar> value) override;
+
+  /**
+   * @copydoc Accumulator::FinalValue
+   */
+  absl::StatusOr<std::shared_ptr<arrow::Scalar>> FinalValue() override;
+
+ private:
+  std::shared_ptr<arrow::Scalar> value_{};
+};
+
+/**
+ * @brief Accumulator to calculate the sum of a set of values.
+ *
+ */
+class SumAccumulator : public Accumulator {
+  SumAccumulator() = default;
+
+  /**
+   * @copydoc Accumulator::Accumulate
+   */
+  absl::Status Accumulate(std::shared_ptr<arrow::Scalar> value) override;
+
+  /**
+   * @copydoc Accumulator::FinalValue
+   */
+  absl::StatusOr<std::shared_ptr<arrow::Scalar>> FinalValue() override;
+
+ private:
+  std::shared_ptr<arrow::Scalar> value_{};
+};
+
 }  // namespace physicalplan
 }  // namespace toyquery
 
