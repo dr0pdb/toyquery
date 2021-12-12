@@ -1,10 +1,13 @@
 set(sources
   src/common/status.cc
   src/dataframe/dataframe.cc
+  src/datasource/datasource.cc
+  src/datasource/record_batch_iterator.cc
   src/execution/execution_context.cc
   src/logicalplan/logicalplan.cc
   src/physicalplan/accumulator.cc
   src/physicalplan/physicalexpression.cc
+  src/physicalplan/physicalplan.cc
   src/toyquery.cc
 )
 

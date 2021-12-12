@@ -40,6 +40,33 @@ class DataSource {
   DISALLOW_COPY_AND_ASSIGN(DataSource);
 };
 
+class CsvDataSource : public DataSource {
+ public:
+  CsvDataSource(std::string filename, int batch_size) : CsvDataSource(filename, batch_size, nullptr) { }
+
+  CsvDataSource(std::string filename, int batch_size, std::shared_ptr<arrow::Schema> schema)
+      : filename_{ filename },
+        batch_size_{ batch_size },
+        schema_{ schema } { }
+
+  ~CsvDataSource() override;
+
+  /**
+   * @copydoc DataSource::Schema
+   */
+  std::shared_ptr<arrow::Schema> Schema() override;
+
+  /**
+   * @copydoc DataSource::Scan
+   */
+  RecordBatchIterator Scan(std::vector<std::string> projection) override;
+
+ private:
+  std::string filename_;
+  int batch_size_;
+  std::shared_ptr<arrow::Schema> schema_;
+};
+
 }  // namespace datasource
 }  // namespace toyquery
 

@@ -14,6 +14,12 @@
 namespace toyquery {
 namespace physicalplan {
 
+namespace {
+
+using ::toyquery::datasource::DataSource;
+
+}
+
 /**
  * @brief Base class for all physical plans.
  *
@@ -63,6 +69,48 @@ class PhysicalPlan {
 
  private:
   DISALLOW_COPY_AND_ASSIGN(PhysicalPlan);
+};
+
+/**
+ * @brief The scan execution
+ *
+ */
+class Scan : public PhysicalPlan {
+ public:
+  Scan(std::shared_ptr<DataSource> data_source, std::vector<std::string> projection)
+      : data_source_{ std::move(data_source) },
+        projection_{ projection } { }
+
+  ~Scan() override;
+
+  /**
+   * @copydoc PhysicalPlan::Schema
+   */
+  absl::StatusOr<std::shared_ptr<arrow::Schema>> Schema() override;
+
+  /**
+   * @copydoc PhysicalPlan::Children
+   */
+  std::vector<std::shared_ptr<PhysicalPlan>> Children() override;
+
+  /**
+   * @copydoc PhysicalPlan::Prepare
+   */
+  absl::Status Prepare() override;
+
+  /**
+   * @copydoc PhysicalPlan::Next
+   */
+  absl::StatusOr<std::shared_ptr<arrow::RecordBatch>> Next() override;
+
+  /**
+   * @copydoc PhysicalPlan::ToString
+   */
+  std::string ToString() override;
+
+ private:
+  std::shared_ptr<DataSource> data_source_;
+  std::vector<std::string> projection_;
 };
 
 }  // namespace physicalplan
