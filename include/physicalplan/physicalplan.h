@@ -110,9 +110,57 @@ class Scan : public PhysicalPlan {
   std::string ToString() override;
 
  private:
+  DISALLOW_COPY_AND_ASSIGN(Scan);
+
   std::shared_ptr<DataSource> data_source_;
   std::vector<std::string> projection_;
   std::shared_ptr<arrow::TableBatchReader> batch_reader_{ nullptr };
+};
+
+/**
+ * @brief The projection execution
+ *
+ */
+class Projection : public PhysicalPlan {
+ public:
+  Projection(std::shared_ptr<PhysicalPlan> input, std::shared_ptr<arrow::Schema> schema, std::vector<std::string> projection)
+      : input_{ input },
+        schema_{ schema },
+        projection_{ projection } { }
+
+  ~Projection() override;
+
+  /**
+   * @copydoc PhysicalPlan::Schema
+   */
+  absl::StatusOr<std::shared_ptr<arrow::Schema>> Schema() override;
+
+  /**
+   * @copydoc PhysicalPlan::Children
+   */
+  std::vector<std::shared_ptr<PhysicalPlan>> Children() override;
+
+  /**
+   * @copydoc PhysicalPlan::Prepare
+   */
+  absl::Status Prepare() override;
+
+  /**
+   * @copydoc PhysicalPlan::Next
+   */
+  absl::StatusOr<std::shared_ptr<arrow::RecordBatch>> Next() override;
+
+  /**
+   * @copydoc PhysicalPlan::ToString
+   */
+  std::string ToString() override;
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(Projection);
+
+  std::shared_ptr<PhysicalPlan> input_;
+  std::shared_ptr<arrow::Schema> schema_;
+  std::vector<std::string> projection_;
 };
 
 }  // namespace physicalplan
