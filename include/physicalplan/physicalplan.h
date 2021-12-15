@@ -47,6 +47,7 @@ class PhysicalPlan {
   /**
    * @brief Prepare the physical plan.
    *
+   * @note Can be an expensive operation if it requires IO operations.
    * @return absl::Status: indicates the status of preparation
    */
   virtual absl::Status Prepare() = 0;
@@ -111,6 +112,7 @@ class Scan : public PhysicalPlan {
  private:
   std::shared_ptr<DataSource> data_source_;
   std::vector<std::string> projection_;
+  std::shared_ptr<arrow::TableBatchReader> batch_reader_{ nullptr };
 };
 
 }  // namespace physicalplan
