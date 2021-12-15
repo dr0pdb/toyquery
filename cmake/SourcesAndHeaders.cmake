@@ -2,7 +2,6 @@ set(sources
   src/common/status.cc
   src/dataframe/dataframe.cc
   src/datasource/datasource.cc
-  src/datasource/record_batch_iterator.cc
   src/execution/execution_context.cc
   src/logicalplan/logicalplan.cc
   src/physicalplan/accumulator.cc
@@ -24,7 +23,6 @@ set(headers
     include/common/status.h
     include/dataframe/dataframe.h
     include/datasource/datasource.h
-    include/datasource/record_batch_iterator.h
     include/execution/execution_context.h
     include/physicalplan/accumulator.h
     include/physicalplan/aggregationexpression.h

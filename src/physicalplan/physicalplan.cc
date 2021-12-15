@@ -6,7 +6,7 @@ namespace toyquery {
 namespace physicalplan {
 
 absl::StatusOr<std::shared_ptr<arrow::Schema>> Scan::Schema() {
-  auto schema = data_source_->Schema();
+  ASSIGN_OR_RETURN(auto schema, data_source_->Schema());
   if (projection_.empty()) return schema;
   return FilterSchema(schema, projection_);
 }

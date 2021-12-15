@@ -6,7 +6,6 @@
 
 #include "arrow/api.h"
 #include "common/macros.h"
-#include "record_batch_iterator.h"
 
 namespace toyquery {
 namespace datasource {
@@ -26,15 +25,15 @@ class DataSource {
    *
    * @return std::shared_ptr<arrow::Schema> Schema of the data source.
    */
-  virtual std::shared_ptr<arrow::Schema> Schema() = 0;
+  virtual absl::StatusOr<std::shared_ptr<arrow::Schema>> Schema() = 0;
 
   /**
    * @brief Scan the data source, selecting the specified columns by name.
    *
    * @param projection: the columns to select.
-   * @return RecordBatchIterator: the iterator to iterate over the record batches.
+   * @return absl::StatusOr<std::shared_ptr<arrow::TableBatchReader>>: the iterator to iterate over the record batches.
    */
-  virtual RecordBatchIterator Scan(std::vector<std::string> projection) = 0;
+  virtual absl::StatusOr<std::shared_ptr<arrow::TableBatchReader>> Scan(std::vector<std::string> projection) = 0;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(DataSource);
@@ -53,15 +52,19 @@ class CsvDataSource : public DataSource {
 
   /**
    * @copydoc DataSource::Schema
+   *
+   * @note Expensive operation: The csv file is read in order to obtain the schema if not already provided.
    */
-  std::shared_ptr<arrow::Schema> Schema() override;
+  absl::StatusOr<std::shared_ptr<arrow::Schema>> Schema() override;
 
   /**
    * @copydoc DataSource::Scan
    */
-  RecordBatchIterator Scan(std::vector<std::string> projection) override;
+  absl::StatusOr<std::shared_ptr<arrow::TableBatchReader>> Scan(std::vector<std::string> projection) override;
 
  private:
+  absl::StatusOr<std::shared_ptr<arrow::Table>> readFile(std::vector<std::string> projection);
+
   std::string filename_;
   int batch_size_;
   std::shared_ptr<arrow::Schema> schema_;

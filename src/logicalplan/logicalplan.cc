@@ -7,7 +7,7 @@ namespace toyquery {
 namespace logicalplan {
 
 absl::StatusOr<std::shared_ptr<arrow::Schema>> Scan::Schema() {
-  auto schema = source_->Schema();
+  ASSIGN_OR_RETURN(auto schema, source_->Schema());
   if (projection_.empty()) { return schema; }
   return FilterSchema(schema, projection_);
 }
