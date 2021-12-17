@@ -167,6 +167,52 @@ class Projection : public PhysicalPlan {
   std::vector<std::shared_ptr<PhysicalExpression>> projection_;
 };
 
+/**
+ * @brief The selection execution
+ *
+ */
+class Selection : public PhysicalPlan {
+ public:
+  Selection(std::shared_ptr<PhysicalPlan> input, std::shared_ptr<PhysicalExpression> predicate)
+      : input_{ input },
+        predicate_{ predicate } { }
+
+  ~Selection() override;
+
+  /**
+   * @copydoc PhysicalPlan::Schema
+   */
+  absl::StatusOr<std::shared_ptr<arrow::Schema>> Schema() override;
+
+  /**
+   * @copydoc PhysicalPlan::Children
+   */
+  std::vector<std::shared_ptr<PhysicalPlan>> Children() override;
+
+  /**
+   * @copydoc PhysicalPlan::Prepare
+   */
+  absl::Status Prepare() override;
+
+  /**
+   * @copydoc PhysicalPlan::Next
+   */
+  absl::StatusOr<std::shared_ptr<arrow::RecordBatch>> Next() override;
+
+  /**
+   * @copydoc PhysicalPlan::ToString
+   */
+  std::string ToString() override;
+
+ private:
+  absl::StatusOr<std::shared_ptr<arrow::Array>> filterColumn(std::shared_ptr<arrow::Array> data, std::shared_ptr<arrow::BooleanArray> predicate);
+
+  DISALLOW_COPY_AND_ASSIGN(Selection);
+
+  std::shared_ptr<PhysicalPlan> input_;
+  std::shared_ptr<PhysicalExpression> predicate_;
+};
+
 }  // namespace physicalplan
 }  // namespace toyquery
 
