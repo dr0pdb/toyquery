@@ -10,7 +10,8 @@
 #include "common/macros.h"
 #include "datasource/datasource.h"
 #include "logicalplan/logicalexpression.h"
-#include "physicalexpression.h"
+#include "physicalplan/aggregationexpression.h"
+#include "physicalplan/physicalexpression.h"
 
 namespace toyquery {
 namespace physicalplan {
@@ -205,12 +206,66 @@ class Selection : public PhysicalPlan {
   std::string ToString() override;
 
  private:
-  absl::StatusOr<std::shared_ptr<arrow::Array>> filterColumn(std::shared_ptr<arrow::Array> data, std::shared_ptr<arrow::BooleanArray> predicate);
+  absl::StatusOr<std::shared_ptr<arrow::Array>> filterColumn(
+      std::shared_ptr<arrow::Array> data,
+      std::shared_ptr<arrow::BooleanArray> predicate);
 
   DISALLOW_COPY_AND_ASSIGN(Selection);
 
   std::shared_ptr<PhysicalPlan> input_;
   std::shared_ptr<PhysicalExpression> predicate_;
+};
+
+/**
+ * @brief The hash aggregation execution
+ *
+ */
+class HashAggregation : public PhysicalPlan {
+ public:
+  HashAggregation(
+      std::shared_ptr<PhysicalPlan> input,
+      std::shared_ptr<arrow::Schema> schema,
+      std::vector<std::shared_ptr<PhysicalPlan>> grouping_expressions,
+      std::vector<std::shared_ptr<AggregationExpression>> aggregation_expressions)
+      : input_{ input },
+        schema_{ schema },
+        grouping_expressions_{ grouping_expressions },
+        aggregation_expressions_{ aggregation_expressions } { }
+
+  ~HashAggregation() override;
+
+  /**
+   * @copydoc PhysicalPlan::Schema
+   */
+  absl::StatusOr<std::shared_ptr<arrow::Schema>> Schema() override;
+
+  /**
+   * @copydoc PhysicalPlan::Children
+   */
+  std::vector<std::shared_ptr<PhysicalPlan>> Children() override;
+
+  /**
+   * @copydoc PhysicalPlan::Prepare
+   */
+  absl::Status Prepare() override;
+
+  /**
+   * @copydoc PhysicalPlan::Next
+   */
+  absl::StatusOr<std::shared_ptr<arrow::RecordBatch>> Next() override;
+
+  /**
+   * @copydoc PhysicalPlan::ToString
+   */
+  std::string ToString() override;
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(HashAggregation);
+
+  std::shared_ptr<PhysicalPlan> input_;
+  std::shared_ptr<arrow::Schema> schema_;
+  std::vector<std::shared_ptr<PhysicalPlan>> grouping_expressions_;
+  std::vector<std::shared_ptr<AggregationExpression>> aggregation_expressions_;
 };
 
 }  // namespace physicalplan

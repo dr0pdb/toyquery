@@ -43,6 +43,7 @@ class Accumulator {
  *
  */
 class MaxAccumulator : public Accumulator {
+ public:
   MaxAccumulator() = default;
 
   /**
@@ -64,6 +65,7 @@ class MaxAccumulator : public Accumulator {
  *
  */
 class MinAccumulator : public Accumulator {
+ public:
   MinAccumulator() = default;
 
   /**
@@ -85,6 +87,7 @@ class MinAccumulator : public Accumulator {
  *
  */
 class SumAccumulator : public Accumulator {
+ public:
   SumAccumulator() = default;
 
   /**
