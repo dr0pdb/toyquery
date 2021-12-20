@@ -225,7 +225,7 @@ class HashAggregation : public PhysicalPlan {
   HashAggregation(
       std::shared_ptr<PhysicalPlan> input,
       std::shared_ptr<arrow::Schema> schema,
-      std::vector<std::shared_ptr<PhysicalPlan>> grouping_expressions,
+      std::vector<std::shared_ptr<PhysicalExpression>> grouping_expressions,
       std::vector<std::shared_ptr<AggregationExpression>> aggregation_expressions)
       : input_{ input },
         schema_{ schema },
@@ -260,12 +260,17 @@ class HashAggregation : public PhysicalPlan {
   std::string ToString() override;
 
  private:
+  absl::StatusOr<std::vector<std::shared_ptr<arrow::RecordBatch>>> getAllInputBatches();
+
   DISALLOW_COPY_AND_ASSIGN(HashAggregation);
 
   std::shared_ptr<PhysicalPlan> input_;
   std::shared_ptr<arrow::Schema> schema_;
-  std::vector<std::shared_ptr<PhysicalPlan>> grouping_expressions_;
+  std::vector<std::shared_ptr<PhysicalExpression>> grouping_expressions_;
   std::vector<std::shared_ptr<AggregationExpression>> aggregation_expressions_;
+
+  int result_idx_{ -1 };
+  std::vector<std::shared_ptr<arrow::RecordBatch>> processed_results_;
 };
 
 }  // namespace physicalplan

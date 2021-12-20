@@ -12,6 +12,8 @@ namespace physicalplan {
 /**
  * @brief Base class for Aggregation expressions such as Max, Min, Sum etc.
  *
+ * The input to the aggregation expression is the expression which should be aggregated.
+ * For eg: SUM (4 * COL_1 + 3 * COL_2), the input would be the 4 * COL_1 + 3 * COL_2 expression.
  */
 class AggregationExpression {
  public:

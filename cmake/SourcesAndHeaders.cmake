@@ -19,6 +19,7 @@ set(headers
     include/common/arrow.h
     include/common/debug.h
     include/common/iterator.h
+    include/common/key.h
     include/common/macros.h
     include/common/status.h
     include/dataframe/dataframe.h
