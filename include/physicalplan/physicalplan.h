@@ -59,7 +59,7 @@ class PhysicalPlan {
    *
    * @return absl::StatusOr<std::shared_ptr<arrow::RecordBatch>>: the next record batch if successful. Error status
    * otherwise.
-   * @note The absl::NotFoundError indicates that all batches have been emitted.
+   * @note The absl::NotFoundError indicates that all batches have been emitted. TODO: rethink this.
    */
   virtual absl::StatusOr<std::shared_ptr<arrow::RecordBatch>> Next() = 0;
 
@@ -269,8 +269,8 @@ class HashAggregation : public PhysicalPlan {
   std::vector<std::shared_ptr<PhysicalExpression>> grouping_expressions_;
   std::vector<std::shared_ptr<AggregationExpression>> aggregation_expressions_;
 
-  int result_idx_{ -1 };
-  std::vector<std::shared_ptr<arrow::RecordBatch>> processed_results_;
+  std::unique_ptr<arrow::TableBatchReader> batch_reader_;
+  std::shared_ptr<arrow::Table> processed_table_;
 };
 
 }  // namespace physicalplan

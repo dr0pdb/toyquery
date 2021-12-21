@@ -120,20 +120,16 @@ std::vector<std::shared_ptr<PhysicalPlan>> HashAggregation::Children() { return 
 absl::Status HashAggregation::Prepare() { return input_->Prepare(); }
 
 absl::StatusOr<std::shared_ptr<arrow::RecordBatch>> HashAggregation::Next() {
-  if (result_idx_ >= 0) {
-    if (result_idx_ < processed_results_.size()) {
-      result_idx_++;
-      return processed_results_.at(result_idx_ - 1);
-    } else {
-      return absl::NotFoundError("All batches already streamed.");
-    }
+  if (batch_reader_ != nullptr) {
+    auto next_batch_or = batch_reader_->Next();
+    if (!next_batch_or.ok()) { return absl::InternalError(GetMessageFromResult(next_batch_or)); }
+    return *next_batch_or;
   }
 
   ASSIGN_OR_RETURN(auto all_batches, getAllInputBatches());
 
   // map from the tuple of grouping keys to list of accumulators
   // <gk1, gk2, gk3 .. gkx> -> [ac1, ac2, .. acy]
-  // TODO: update the key of the map.
   std::unordered_map<toyquery::Key, std::vector<std::shared_ptr<Accumulator>>> m;
 
   for (auto& batch : all_batches) {
@@ -175,7 +171,7 @@ absl::StatusOr<std::shared_ptr<arrow::RecordBatch>> HashAggregation::Next() {
       }
 
       // perform the accumulation.
-      std::vector<std::shared_ptr<Accumulator>> row_accumulators = m[row_key];
+      auto row_accumulators = m[row_key];
       for (int accumulator_index = 0; accumulator_index < row_accumulators.size(); accumulator_index++) {
         auto accumulator_input_or = aggregation_inputs.at(accumulator_index)->GetScalar(row_idx);
         if (!accumulator_input_or.ok()) { return absl::InternalError(GetMessageFromResult(accumulator_input_or)); }
@@ -197,19 +193,30 @@ absl::StatusOr<std::shared_ptr<arrow::RecordBatch>> HashAggregation::Next() {
 
     // insert the row keys.
     for (int col_idx = 0; col_idx < gk.scalars_.size(); col_idx++) {
+#define APPEND_ACCUMULATED_SCALAR(builder_type, scaler_type)                         \
+  auto typed_builder = std::static_pointer_cast<builder_type>(builders.at(col_idx)); \
+  typed_builder->UnsafeAppend(std::static_pointer_cast<scaler_type>(gk.scalars_[col_idx])->value);
+
       switch (schema_->field(col_idx)->type()->id()) {
         case arrow::Type::BOOL: {
-          auto boolean_builder = std::static_pointer_cast<arrow::BooleanBuilder>(builders.at(col_idx));
-          // set the value in the builder
+          APPEND_ACCUMULATED_SCALAR(arrow::BooleanBuilder, arrow::BooleanScalar);
+          break;
         }
         case arrow::Type::INT64: {
+          APPEND_ACCUMULATED_SCALAR(arrow::Int64Builder, arrow::Int64Scalar);
+          break;
         }
         case arrow::Type::DOUBLE: {
+          APPEND_ACCUMULATED_SCALAR(arrow::DoubleBuilder, arrow::DoubleScalar);
+          break;
         }
         case arrow::Type::STRING: {
+          // TODO
+          break;
         }
         default: return absl::InternalError("Unsupported type");
       }
+#undef APPEND_ACCUMULATED_SCALAR
     }
 
     // insert the accumulated values for the row key.
@@ -223,15 +230,19 @@ absl::StatusOr<std::shared_ptr<arrow::RecordBatch>> HashAggregation::Next() {
       switch (schema_->field(col_idx)->type()->id()) {
         case arrow::Type::BOOL: {
           APPEND_ACCUMULATED_SCALAR(arrow::BooleanBuilder, arrow::BooleanScalar);
+          break;
         }
         case arrow::Type::INT64: {
           APPEND_ACCUMULATED_SCALAR(arrow::Int64Builder, arrow::Int64Scalar);
+          break;
         }
         case arrow::Type::DOUBLE: {
           APPEND_ACCUMULATED_SCALAR(arrow::DoubleBuilder, arrow::DoubleScalar);
+          break;
         }
         case arrow::Type::STRING: {
           // TODO
+          break;
         }
         default: return absl::InternalError("Unsupported type");
       }
@@ -246,10 +257,12 @@ absl::StatusOr<std::shared_ptr<arrow::RecordBatch>> HashAggregation::Next() {
     if (!finish_status.ok()) { return absl::InternalError(GetMessageFromStatus(finish_status)); }
   }
 
-  // TODO: store this
-  arrow::Table::Make(schema_, aggregated_data);
-  result_idx_ = 1;  // first result should be returned in this call itself.
-  return absl::OkStatus();
+  processed_table_ = arrow::Table::Make(schema_, aggregated_data);
+  batch_reader_ = std::make_unique<arrow::TableBatchReader>(processed_table_.operator*());
+
+  auto first_batch_or = batch_reader_->Next();
+  if (!first_batch_or.ok()) { return absl::InternalError(GetMessageFromResult(first_batch_or)); }
+  return *first_batch_or;
 }
 
 absl::StatusOr<std::vector<std::shared_ptr<arrow::RecordBatch>>> HashAggregation::getAllInputBatches() {
