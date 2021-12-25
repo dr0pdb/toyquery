@@ -4,6 +4,8 @@ set(sources
   src/datasource/datasource.cc
   src/execution/execution_context.cc
   src/logicalplan/logicalplan.cc
+  src/optimization/optimizer.cc
+  src/optimization/utils.cc
   src/physicalplan/accumulator.cc
   src/physicalplan/physicalexpression.cc
   src/physicalplan/physicalplan.cc
@@ -25,6 +27,8 @@ set(headers
     include/dataframe/dataframe.h
     include/datasource/datasource.h
     include/execution/execution_context.h
+    include/optimization/optimizer.h
+    include/optimization/utils.h
     include/physicalplan/accumulator.h
     include/physicalplan/aggregationexpression.h
     include/physicalplan/physicalexpression.h

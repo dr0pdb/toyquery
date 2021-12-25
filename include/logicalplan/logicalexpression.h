@@ -13,6 +13,48 @@ namespace logicalplan {
 
 class LogicalPlan;
 
+enum class LogicalExpressionType {
+  // columns
+  Column,
+  ColumnIndex,
+
+  // literals
+  LiteralString,
+  LiteralLong,
+  LiteralDouble,
+
+  // boolean
+  Not,
+  And,
+  Or,
+
+  // comparison
+  Eq,
+  Neq,
+  Gt,
+  GtEq,
+  Lt,
+  LtEq,
+
+  // math
+  Add,
+  Subtract,
+  Multiply,
+  Divide,
+  Modulus,
+
+  // Aggregation
+  Sum,
+  Min,
+  Max,
+  Avg,
+  Count,
+
+  // misc.
+  Cast,
+  Alias,
+};
+
 /**
  * @brief Base class for all logical expressions.
  *
@@ -41,6 +83,15 @@ class LogicalExpression {
   virtual absl::StatusOr<std::shared_ptr<arrow::Field>> ToField(std::shared_ptr<LogicalPlan> input) = 0;
 
   /**
+   * @brief Get the type of the logical expression.
+   *
+   * Can be used to dispatch to specific implementations based of this type.
+   *
+   * @return LogicalExpressionType: the type
+   */
+  virtual LogicalExpressionType type() = 0;
+
+  /**
    * @brief Get string representation to print for debugging.
    *
    * @return std::string: the string representation of the expression.
@@ -62,6 +113,11 @@ class Column : public LogicalExpression {
    * @copydoc LogicalExpression::ToField()
    */
   absl::StatusOr<std::shared_ptr<arrow::Field>> ToField(std::shared_ptr<LogicalPlan> input) override;
+
+  /**
+   * @copydoc LogicalExpression::type()
+   */
+  LogicalExpressionType type() override { return LogicalExpressionType::Column; }
 
   /**
    * @copydoc LogicalExpression::ToString()
@@ -86,6 +142,11 @@ class ColumnIndex : public LogicalExpression {
   absl::StatusOr<std::shared_ptr<arrow::Field>> ToField(std::shared_ptr<LogicalPlan> input) override;
 
   /**
+   * @copydoc LogicalExpression::type()
+   */
+  LogicalExpressionType type() override { return LogicalExpressionType::ColumnIndex; }
+
+  /**
    * @copydoc LogicalExpression::ToString()
    */
   std::string ToString() override;
@@ -106,6 +167,11 @@ class LiteralString : public LogicalExpression {
    * @copydoc LogicalExpression::ToField()
    */
   absl::StatusOr<std::shared_ptr<arrow::Field>> ToField(std::shared_ptr<LogicalPlan> input) override;
+
+  /**
+   * @copydoc LogicalExpression::type()
+   */
+  LogicalExpressionType type() override { return LogicalExpressionType::LiteralString; }
 
   /**
    * @copydoc LogicalExpression::ToString()
@@ -130,6 +196,11 @@ class LiteralLong : public LogicalExpression {
   absl::StatusOr<std::shared_ptr<arrow::Field>> ToField(std::shared_ptr<LogicalPlan> input) override;
 
   /**
+   * @copydoc LogicalExpression::type()
+   */
+  LogicalExpressionType type() override { return LogicalExpressionType::LiteralLong; }
+
+  /**
    * @copydoc LogicalExpression::ToString()
    */
   std::string ToString() override;
@@ -152,6 +223,11 @@ class LiteralDouble : public LogicalExpression {
   absl::StatusOr<std::shared_ptr<arrow::Field>> ToField(std::shared_ptr<LogicalPlan> input) override;
 
   /**
+   * @copydoc LogicalExpression::type()
+   */
+  LogicalExpressionType type() override { return LogicalExpressionType::LiteralDouble; }
+
+  /**
    * @copydoc LogicalExpression::ToString()
    */
   std::string ToString() override;
@@ -172,6 +248,11 @@ class Cast : public LogicalExpression {
    * @copydoc LogicalExpression::ToField()
    */
   absl::StatusOr<std::shared_ptr<arrow::Field>> ToField(std::shared_ptr<LogicalPlan> input) override;
+
+  /**
+   * @copydoc LogicalExpression::type()
+   */
+  LogicalExpressionType type() override { return LogicalExpressionType::Cast; }
 
   /**
    * @copydoc LogicalExpression::ToString()
@@ -204,6 +285,11 @@ class Alias : public LogicalExpression {
     ASSIGN_OR_RETURN(std::shared_ptr<arrow::Field> field, expr_->ToField(input));
     return std::make_shared<arrow::Field>(alias_, field->type());
   }
+
+  /**
+   * @copydoc LogicalExpression::type()
+   */
+  LogicalExpressionType type() override { return LogicalExpressionType::Alias; }
 
   /**
    * @copydoc LogicalExpression::ToString()
@@ -252,6 +338,11 @@ class Not : public UnaryExpression {
   absl::StatusOr<std::shared_ptr<arrow::Field>> ToField(std::shared_ptr<LogicalPlan> input) override {
     return std::make_shared<arrow::Field>(this->name_, arrow::boolean());
   }
+
+  /**
+   * @copydoc LogicalExpression::type()
+   */
+  LogicalExpressionType type() override { return LogicalExpressionType::Not; }
 };
 
 /**
@@ -313,6 +404,11 @@ class And : public BooleanBinaryExpression {
       : BooleanBinaryExpression("and", "AND", left, right) { }
 
   ~And();
+
+  /**
+   * @copydoc LogicalExpression::type()
+   */
+  LogicalExpressionType type() override { return LogicalExpressionType::Add; }
 };
 
 /**
@@ -324,6 +420,11 @@ class Or : public BooleanBinaryExpression {
       : BooleanBinaryExpression("or", "OR", left, right) { }
 
   ~Or();
+
+  /**
+   * @copydoc LogicalExpression::type()
+   */
+  LogicalExpressionType type() override { return LogicalExpressionType::Or; }
 };
 
 /**
@@ -335,6 +436,11 @@ class Eq : public BooleanBinaryExpression {
       : BooleanBinaryExpression("eq", "=", left, right) { }
 
   ~Eq();
+
+  /**
+   * @copydoc LogicalExpression::type()
+   */
+  LogicalExpressionType type() override { return LogicalExpressionType::Eq; }
 };
 
 /**
@@ -346,6 +452,11 @@ class Neq : public BooleanBinaryExpression {
       : BooleanBinaryExpression("neq", "!=", left, right) { }
 
   ~Neq();
+
+  /**
+   * @copydoc LogicalExpression::type()
+   */
+  LogicalExpressionType type() override { return LogicalExpressionType::Neq; }
 };
 
 /**
@@ -357,6 +468,11 @@ class Gt : public BooleanBinaryExpression {
       : BooleanBinaryExpression("ge", ">", left, right) { }
 
   ~Gt();
+
+  /**
+   * @copydoc LogicalExpression::type()
+   */
+  LogicalExpressionType type() override { return LogicalExpressionType::Gt; }
 };
 
 /**
@@ -368,6 +484,11 @@ class GtEq : public BooleanBinaryExpression {
       : BooleanBinaryExpression("gteq", ">=", left, right) { }
 
   ~GtEq();
+
+  /**
+   * @copydoc LogicalExpression::type()
+   */
+  LogicalExpressionType type() override { return LogicalExpressionType::GtEq; }
 };
 
 /**
@@ -379,6 +500,11 @@ class Lt : public BooleanBinaryExpression {
       : BooleanBinaryExpression("lt", "<", left, right) { }
 
   ~Lt();
+
+  /**
+   * @copydoc LogicalExpression::type()
+   */
+  LogicalExpressionType type() override { return LogicalExpressionType::Lt; }
 };
 
 /**
@@ -390,6 +516,11 @@ class LtEq : public BooleanBinaryExpression {
       : BooleanBinaryExpression("lteq", "<=", left, right) { }
 
   ~LtEq();
+
+  /**
+   * @copydoc LogicalExpression::type()
+   */
+  LogicalExpressionType type() override { return LogicalExpressionType::LtEq; }
 };
 
 /**
@@ -424,6 +555,11 @@ class Add : public MathBinaryExpression {
  public:
   Add(std::shared_ptr<LogicalExpression> left, std::shared_ptr<LogicalExpression> right)
       : MathBinaryExpression("add", "+", left, right) { }
+
+  /**
+   * @copydoc LogicalExpression::type()
+   */
+  LogicalExpressionType type() override { return LogicalExpressionType::Add; }
 };
 
 /**
@@ -433,6 +569,11 @@ class Subtract : public MathBinaryExpression {
  public:
   Subtract(std::shared_ptr<LogicalExpression> left, std::shared_ptr<LogicalExpression> right)
       : MathBinaryExpression("subtract", "-", left, right) { }
+
+  /**
+   * @copydoc LogicalExpression::type()
+   */
+  LogicalExpressionType type() override { return LogicalExpressionType::Subtract; }
 };
 
 /**
@@ -442,6 +583,11 @@ class Multiply : public MathBinaryExpression {
  public:
   Multiply(std::shared_ptr<LogicalExpression> left, std::shared_ptr<LogicalExpression> right)
       : MathBinaryExpression("multiply", "*", left, right) { }
+
+  /**
+   * @copydoc LogicalExpression::type()
+   */
+  LogicalExpressionType type() override { return LogicalExpressionType::Multiply; }
 };
 
 /**
@@ -451,6 +597,11 @@ class Divide : public MathBinaryExpression {
  public:
   Divide(std::shared_ptr<LogicalExpression> left, std::shared_ptr<LogicalExpression> right)
       : MathBinaryExpression("divide", "/", left, right) { }
+
+  /**
+   * @copydoc LogicalExpression::type()
+   */
+  LogicalExpressionType type() override { return LogicalExpressionType::Divide; }
 };
 
 /**
@@ -460,6 +611,11 @@ class Modulus : public MathBinaryExpression {
  public:
   Modulus(std::shared_ptr<LogicalExpression> left, std::shared_ptr<LogicalExpression> right)
       : MathBinaryExpression("modulus", "%", left, right) { }
+
+  /**
+   * @copydoc LogicalExpression::type()
+   */
+  LogicalExpressionType type() override { return LogicalExpressionType::Modulus; }
 };
 
 /**
@@ -494,6 +650,11 @@ class AggregateExpression : public LogicalExpression {
 class Sum : public AggregateExpression {
  public:
   Sum(std::shared_ptr<LogicalExpression> input) : AggregateExpression("sum", input) { }
+
+  /**
+   * @copydoc LogicalExpression::type()
+   */
+  LogicalExpressionType type() override { return LogicalExpressionType::Sum; }
 };
 
 /**
@@ -502,6 +663,11 @@ class Sum : public AggregateExpression {
 class Min : public AggregateExpression {
  public:
   Min(std::shared_ptr<LogicalExpression> input) : AggregateExpression("min", input) { }
+
+  /**
+   * @copydoc LogicalExpression::type()
+   */
+  LogicalExpressionType type() override { return LogicalExpressionType::Min; }
 };
 
 /**
@@ -510,6 +676,11 @@ class Min : public AggregateExpression {
 class Max : public AggregateExpression {
  public:
   Max(std::shared_ptr<LogicalExpression> input) : AggregateExpression("max", input) { }
+
+  /**
+   * @copydoc LogicalExpression::type()
+   */
+  LogicalExpressionType type() override { return LogicalExpressionType::Max; }
 };
 
 /**
@@ -518,6 +689,11 @@ class Max : public AggregateExpression {
 class Avg : public AggregateExpression {
  public:
   Avg(std::shared_ptr<LogicalExpression> input) : AggregateExpression("avg", input) { }
+
+  /**
+   * @copydoc LogicalExpression::type()
+   */
+  LogicalExpressionType type() override { return LogicalExpressionType::Avg; }
 };
 
 /**
@@ -526,6 +702,11 @@ class Avg : public AggregateExpression {
 class Count : public AggregateExpression {
  public:
   Count(std::shared_ptr<LogicalExpression> input) : AggregateExpression("count", input) { }
+
+  /**
+   * @copydoc LogicalExpression::type()
+   */
+  LogicalExpressionType type() override { return LogicalExpressionType::Count; }
 };
 
 }  // namespace logicalplan
