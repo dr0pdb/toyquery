@@ -61,8 +61,7 @@ enum class LogicalExpressionType {
  * The logical expression provides information needed during the planning phase such as the name and data type of the
  * expression.
  */
-class LogicalExpression {
- public:
+struct LogicalExpression {
   LogicalExpression() = default;
   virtual ~LogicalExpression() = 0;
 
@@ -97,15 +96,12 @@ class LogicalExpression {
    * @return std::string: the string representation of the expression.
    */
   virtual std::string ToString();
-
- private:
 };
 
 /**
  * @brief A reference to a column of a table by name.
  */
-class Column : public LogicalExpression {
- public:
+struct Column : public LogicalExpression {
   Column(std::string name);
   ~Column();
 
@@ -124,15 +120,13 @@ class Column : public LogicalExpression {
    */
   std::string ToString() override;
 
- private:
   std::string name_;
 };
 
 /**
  * @brief A reference to a column of a table by index.
  */
-class ColumnIndex : public LogicalExpression {
- public:
+struct ColumnIndex : public LogicalExpression {
   ColumnIndex(int index);
   ~ColumnIndex();
 
@@ -151,15 +145,13 @@ class ColumnIndex : public LogicalExpression {
    */
   std::string ToString() override;
 
- private:
   int index_;
 };
 
 /**
  * @brief A literal string expression.
  */
-class LiteralString : public LogicalExpression {
- public:
+struct LiteralString : public LogicalExpression {
   LiteralString(std::string value);
   ~LiteralString();
 
@@ -178,15 +170,13 @@ class LiteralString : public LogicalExpression {
    */
   std::string ToString() override;
 
- private:
   std::string value_;
 };
 
 /**
  * @brief A literal int64 expression.
  */
-class LiteralLong : public LogicalExpression {
- public:
+struct LiteralLong : public LogicalExpression {
   LiteralLong(int64_t value);
   ~LiteralLong();
 
@@ -205,15 +195,13 @@ class LiteralLong : public LogicalExpression {
    */
   std::string ToString() override;
 
- private:
   int64_t value_;
 };
 
 /**
  * @brief A literal double expression.
  */
-class LiteralDouble : public LogicalExpression {
- public:
+struct LiteralDouble : public LogicalExpression {
   LiteralDouble(double value);
   ~LiteralDouble();
 
@@ -232,15 +220,13 @@ class LiteralDouble : public LogicalExpression {
    */
   std::string ToString() override;
 
- private:
   double value_;
 };
 
 /**
  * @brief A cast expression.
  */
-class Cast : public LogicalExpression {
- public:
+struct Cast : public LogicalExpression {
   Cast(std::shared_ptr<LogicalExpression> expr, std::shared_ptr<arrow::DataType> type) : expr_{ expr }, type_{ type } {};
   ~Cast();
 
@@ -259,7 +245,6 @@ class Cast : public LogicalExpression {
    */
   std::string ToString() override;
 
- protected:
   std::shared_ptr<LogicalExpression> expr_;
   std::shared_ptr<arrow::DataType> type_;
 };
@@ -269,8 +254,7 @@ class Cast : public LogicalExpression {
  *
  * Format: expr AS alias
  */
-class Alias : public LogicalExpression {
- public:
+struct Alias : public LogicalExpression {
   Alias(std::shared_ptr<LogicalExpression> expr, std::string alias)
       : expr_{ std::move(expr) },
         alias_{ std::move(alias) } { }
@@ -296,16 +280,14 @@ class Alias : public LogicalExpression {
    */
   std::string ToString() override { return "todo"; }
 
- protected:
   std::shared_ptr<LogicalExpression> expr_;
   std::string alias_;
 };
 
 /**
- * @brief The base class for a unary expression.
+ * @brief The base struct for a unary expression.
  */
-class UnaryExpression : public LogicalExpression {
- public:
+struct UnaryExpression : public LogicalExpression {
   UnaryExpression(std::string name, std::string op, std::shared_ptr<LogicalExpression> expr)
       : name_{ std::move(name) },
         op_{ std::move(op) },
@@ -318,7 +300,6 @@ class UnaryExpression : public LogicalExpression {
    */
   std::string ToString() override;
 
- protected:
   std::string name_;
   std::string op_;
   std::shared_ptr<LogicalExpression> expr_;
@@ -327,8 +308,7 @@ class UnaryExpression : public LogicalExpression {
 /**
  * @brief The logical NOT expression.
  */
-class Not : public UnaryExpression {
- public:
+struct Not : public UnaryExpression {
   Not(std::shared_ptr<LogicalExpression> expr) : UnaryExpression("not", "NOT", expr) { }
   ~Not();
 
@@ -346,10 +326,9 @@ class Not : public UnaryExpression {
 };
 
 /**
- * @brief The base class for a binary expression.
+ * @brief The base struct for a binary expression.
  */
-class BinaryExpression : public LogicalExpression {
- public:
+struct BinaryExpression : public LogicalExpression {
   BinaryExpression(
       std::string name,
       std::string op,
@@ -366,7 +345,6 @@ class BinaryExpression : public LogicalExpression {
    */
   std::string ToString() override { return "todo"; }
 
- protected:
   std::string name_;
   std::string op_;
   std::shared_ptr<LogicalExpression> left_;
@@ -374,10 +352,9 @@ class BinaryExpression : public LogicalExpression {
 };
 
 /**
- * @brief The base class for a binary expression that outputs boolean.
+ * @brief The base struct for a binary expression that outputs boolean.
  */
-class BooleanBinaryExpression : public BinaryExpression {
- public:
+struct BooleanBinaryExpression : public BinaryExpression {
   BooleanBinaryExpression(
       std::string name,
       std::string op,
@@ -398,8 +375,7 @@ class BooleanBinaryExpression : public BinaryExpression {
 /**
  * @brief The AND logical expression.
  */
-class And : public BooleanBinaryExpression {
- public:
+struct And : public BooleanBinaryExpression {
   And(std::shared_ptr<LogicalExpression> left, std::shared_ptr<LogicalExpression> right)
       : BooleanBinaryExpression("and", "AND", left, right) { }
 
@@ -414,8 +390,7 @@ class And : public BooleanBinaryExpression {
 /**
  * @brief The OR logical expression.
  */
-class Or : public BooleanBinaryExpression {
- public:
+struct Or : public BooleanBinaryExpression {
   Or(std::shared_ptr<LogicalExpression> left, std::shared_ptr<LogicalExpression> right)
       : BooleanBinaryExpression("or", "OR", left, right) { }
 
@@ -430,8 +405,7 @@ class Or : public BooleanBinaryExpression {
 /**
  * @brief The equality logical expression.
  */
-class Eq : public BooleanBinaryExpression {
- public:
+struct Eq : public BooleanBinaryExpression {
   Eq(std::shared_ptr<LogicalExpression> left, std::shared_ptr<LogicalExpression> right)
       : BooleanBinaryExpression("eq", "=", left, right) { }
 
@@ -446,8 +420,7 @@ class Eq : public BooleanBinaryExpression {
 /**
  * @brief The inequality logical expression.
  */
-class Neq : public BooleanBinaryExpression {
- public:
+struct Neq : public BooleanBinaryExpression {
   Neq(std::shared_ptr<LogicalExpression> left, std::shared_ptr<LogicalExpression> right)
       : BooleanBinaryExpression("neq", "!=", left, right) { }
 
@@ -462,8 +435,7 @@ class Neq : public BooleanBinaryExpression {
 /**
  * @brief The greater than logical expression.
  */
-class Gt : public BooleanBinaryExpression {
- public:
+struct Gt : public BooleanBinaryExpression {
   Gt(std::shared_ptr<LogicalExpression> left, std::shared_ptr<LogicalExpression> right)
       : BooleanBinaryExpression("ge", ">", left, right) { }
 
@@ -478,8 +450,7 @@ class Gt : public BooleanBinaryExpression {
 /**
  * @brief The greater than equals logical expression.
  */
-class GtEq : public BooleanBinaryExpression {
- public:
+struct GtEq : public BooleanBinaryExpression {
   GtEq(std::shared_ptr<LogicalExpression> left, std::shared_ptr<LogicalExpression> right)
       : BooleanBinaryExpression("gteq", ">=", left, right) { }
 
@@ -494,8 +465,7 @@ class GtEq : public BooleanBinaryExpression {
 /**
  * @brief The less than logical expression.
  */
-class Lt : public BooleanBinaryExpression {
- public:
+struct Lt : public BooleanBinaryExpression {
   Lt(std::shared_ptr<LogicalExpression> left, std::shared_ptr<LogicalExpression> right)
       : BooleanBinaryExpression("lt", "<", left, right) { }
 
@@ -510,8 +480,7 @@ class Lt : public BooleanBinaryExpression {
 /**
  * @brief The less than equals logical expression.
  */
-class LtEq : public BooleanBinaryExpression {
- public:
+struct LtEq : public BooleanBinaryExpression {
   LtEq(std::shared_ptr<LogicalExpression> left, std::shared_ptr<LogicalExpression> right)
       : BooleanBinaryExpression("lteq", "<=", left, right) { }
 
@@ -524,10 +493,9 @@ class LtEq : public BooleanBinaryExpression {
 };
 
 /**
- * @brief The base class for a binary expression that is the result of a mathematical operation.
+ * @brief The base struct for a binary expression that is the result of a mathematical operation.
  */
-class MathBinaryExpression : public BinaryExpression {
- public:
+struct MathBinaryExpression : public BinaryExpression {
   MathBinaryExpression(
       std::string name,
       std::string op,
@@ -551,8 +519,7 @@ class MathBinaryExpression : public BinaryExpression {
 /**
  * @brief The addition logical expression.
  */
-class Add : public MathBinaryExpression {
- public:
+struct Add : public MathBinaryExpression {
   Add(std::shared_ptr<LogicalExpression> left, std::shared_ptr<LogicalExpression> right)
       : MathBinaryExpression("add", "+", left, right) { }
 
@@ -565,8 +532,7 @@ class Add : public MathBinaryExpression {
 /**
  * @brief The subtraction logical expression.
  */
-class Subtract : public MathBinaryExpression {
- public:
+struct Subtract : public MathBinaryExpression {
   Subtract(std::shared_ptr<LogicalExpression> left, std::shared_ptr<LogicalExpression> right)
       : MathBinaryExpression("subtract", "-", left, right) { }
 
@@ -579,8 +545,7 @@ class Subtract : public MathBinaryExpression {
 /**
  * @brief The multiplication logical expression.
  */
-class Multiply : public MathBinaryExpression {
- public:
+struct Multiply : public MathBinaryExpression {
   Multiply(std::shared_ptr<LogicalExpression> left, std::shared_ptr<LogicalExpression> right)
       : MathBinaryExpression("multiply", "*", left, right) { }
 
@@ -593,8 +558,7 @@ class Multiply : public MathBinaryExpression {
 /**
  * @brief The division logical expression.
  */
-class Divide : public MathBinaryExpression {
- public:
+struct Divide : public MathBinaryExpression {
   Divide(std::shared_ptr<LogicalExpression> left, std::shared_ptr<LogicalExpression> right)
       : MathBinaryExpression("divide", "/", left, right) { }
 
@@ -607,8 +571,7 @@ class Divide : public MathBinaryExpression {
 /**
  * @brief The modulus logical expression.
  */
-class Modulus : public MathBinaryExpression {
- public:
+struct Modulus : public MathBinaryExpression {
   Modulus(std::shared_ptr<LogicalExpression> left, std::shared_ptr<LogicalExpression> right)
       : MathBinaryExpression("modulus", "%", left, right) { }
 
@@ -619,10 +582,9 @@ class Modulus : public MathBinaryExpression {
 };
 
 /**
- * @brief The base class for an aggregate expression.
+ * @brief The base struct for an aggregate expression.
  */
-class AggregateExpression : public LogicalExpression {
- public:
+struct AggregateExpression : public LogicalExpression {
   AggregateExpression(std::string name, std::shared_ptr<LogicalExpression> expr)
       : name_{ std::move(name) },
         expr_{ std::move(expr) } { }
@@ -639,7 +601,6 @@ class AggregateExpression : public LogicalExpression {
     return std::make_shared<arrow::Field>(this->name_, field->type());
   }
 
- protected:
   std::string name_;
   std::shared_ptr<LogicalExpression> expr_;
 };
@@ -647,8 +608,7 @@ class AggregateExpression : public LogicalExpression {
 /**
  * @brief The multiplication logical expression.
  */
-class Sum : public AggregateExpression {
- public:
+struct Sum : public AggregateExpression {
   Sum(std::shared_ptr<LogicalExpression> input) : AggregateExpression("sum", input) { }
 
   /**
@@ -660,8 +620,7 @@ class Sum : public AggregateExpression {
 /**
  * @brief The MIN aggregate logical expression.
  */
-class Min : public AggregateExpression {
- public:
+struct Min : public AggregateExpression {
   Min(std::shared_ptr<LogicalExpression> input) : AggregateExpression("min", input) { }
 
   /**
@@ -673,8 +632,7 @@ class Min : public AggregateExpression {
 /**
  * @brief The MAX aggregate logical expression.
  */
-class Max : public AggregateExpression {
- public:
+struct Max : public AggregateExpression {
   Max(std::shared_ptr<LogicalExpression> input) : AggregateExpression("max", input) { }
 
   /**
@@ -686,8 +644,7 @@ class Max : public AggregateExpression {
 /**
  * @brief The AVG aggregate logical expression.
  */
-class Avg : public AggregateExpression {
- public:
+struct Avg : public AggregateExpression {
   Avg(std::shared_ptr<LogicalExpression> input) : AggregateExpression("avg", input) { }
 
   /**
@@ -699,8 +656,7 @@ class Avg : public AggregateExpression {
 /**
  * @brief The COUNT aggregate logical expression.
  */
-class Count : public AggregateExpression {
- public:
+struct Count : public AggregateExpression {
   Count(std::shared_ptr<LogicalExpression> input) : AggregateExpression("count", input) { }
 
   /**
