@@ -10,6 +10,18 @@ namespace toyquery {
 namespace optimization {
 
 /**
+ * @brief The query optimizer
+ *
+ */
+class Optimizer {
+ public:
+  Optimizer();
+
+  absl::StatusOr<std::shared_ptr<toyquery::logicalplan::LogicalPlan>> Optimize(
+      std::shared_ptr<toyquery::logicalplan::LogicalPlan> input_expr);
+};
+
+/**
  * @brief Base class for all optimizer rules.
  *
  */

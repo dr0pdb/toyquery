@@ -15,6 +15,15 @@ using ::toyquery::logicalplan::Selection;
 
 }  // namespace
 
+absl::StatusOr<std::shared_ptr<LogicalPlan>> Optimizer::Optimize(std::shared_ptr<LogicalPlan> logical_plan) {
+  std::vector<std::unique_ptr<OptimizerRule>> rules = { std::make_unique<ProjectionPushDownRule>() };
+
+  std::shared_ptr<LogicalPlan> optimized_plan = logical_plan;
+  for (auto& rule : rules) { ASSIGN_OR_RETURN(optimized_plan, rule->Optimize(optimized_plan)); }
+
+  return optimized_plan;
+}
+
 absl::StatusOr<std::shared_ptr<LogicalPlan>> ProjectionPushDownRule::Optimize(std::shared_ptr<LogicalPlan> logical_plan) {
   std::unordered_set<std::string> column_names;
   return pushDown(logical_plan, column_names);
