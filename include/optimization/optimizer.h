@@ -9,6 +9,8 @@
 namespace toyquery {
 namespace optimization {
 
+class OptimizerRule;
+
 /**
  * @brief The query optimizer
  *
@@ -19,6 +21,9 @@ class Optimizer {
 
   absl::StatusOr<std::shared_ptr<toyquery::logicalplan::LogicalPlan>> Optimize(
       std::shared_ptr<toyquery::logicalplan::LogicalPlan> input_expr);
+
+ private:
+  std::vector<std::unique_ptr<OptimizerRule>> rules_{};
 };
 
 /**
