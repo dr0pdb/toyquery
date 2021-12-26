@@ -16,11 +16,13 @@ namespace optimization {
  *
  * @param expressions: the list of expressions
  * @param input: the input expression
- * @return std::unordered_set<std::string>: the set of column names
+ * @param accumulator: the container in which to put the column names in
+ * @return absl::Status: the status of the operation
  */
-absl::StatusOr<std::unordered_set<std::string>> ExtractColumns(
+absl::Status ExtractColumns(
     std::vector<std::shared_ptr<toyquery::logicalplan::LogicalExpression>> expressions,
-    std::shared_ptr<toyquery::logicalplan::LogicalPlan> input);
+    std::shared_ptr<toyquery::logicalplan::LogicalPlan> input,
+    std::unordered_set<std::string>& accumulator);
 
 /**
  * @brief Extract all the columns referenced by a single expression.

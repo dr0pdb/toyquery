@@ -19,7 +19,7 @@ std::shared_ptr<DataFrame> DataFrameImpl::Filter(std::shared_ptr<LogicalExpressi
 
 std::shared_ptr<DataFrame> DataFrameImpl::Aggregate(
     std::vector<std::shared_ptr<LogicalExpression>> group_by,
-    std::vector<std::shared_ptr<LogicalExpression>> aggregate_expr) {
+    std::vector<std::shared_ptr<AggregateExpression>> aggregate_expr) {
   return std::make_shared<DataFrameImpl>(std::make_shared<Aggregation>(plan_, group_by, aggregate_expr));
 }
 

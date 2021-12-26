@@ -14,11 +14,21 @@ namespace toyquery {
 namespace logicalplan {
 
 /**
+ * @brief The type of logical plan.
+ *
+ */
+enum class LogicalPlanType {
+  Scan,
+  Projection,
+  Selection,
+  Aggregation,
+};
+
+/**
  * @brief Base class for all logical plans.
  *
  */
-class LogicalPlan {
- public:
+struct LogicalPlan {
   LogicalPlan() = default;
 
   virtual ~LogicalPlan() = 0;
@@ -38,6 +48,13 @@ class LogicalPlan {
   virtual std::vector<std::shared_ptr<LogicalPlan>> Children() = 0;
 
   /**
+   * @brief Get the type of the logical plan
+   *
+   * @return LogicalPlanType the type
+   */
+  virtual LogicalPlanType Type() = 0;
+
+  /**
    * @brief Get string representation to print for debugging.
    *
    * @return std::string: the string representation of the expression.
@@ -52,8 +69,7 @@ class LogicalPlan {
  * @brief Scan logical plan scans over a datasource applying an optional projection.
  *
  */
-class Scan : public LogicalPlan {
- public:
+struct Scan : public LogicalPlan {
   Scan(std::string path, std::shared_ptr<toyquery::datasource::DataSource> source, std::vector<std::string> projection)
       : path_{ std::move(path) },
         source_{ std::move(source) },
@@ -72,11 +88,15 @@ class Scan : public LogicalPlan {
   std::vector<std::shared_ptr<LogicalPlan>> Children() override;
 
   /**
+   * @copydoc LogicalPlan::Type()
+   */
+  LogicalPlanType Type() override;
+
+  /**
    * @copydoc LogicalPlan::ToString()
    */
   std::string ToString() override;
 
- private:
   std::string path_;
   std::shared_ptr<toyquery::datasource::DataSource> source_;
   std::vector<std::string> projection_;
@@ -87,8 +107,7 @@ class Scan : public LogicalPlan {
  *
  * The fields referenced by the projection expressions should be present in the schema of the input plan.
  */
-class Projection : public LogicalPlan {
- public:
+struct Projection : public LogicalPlan {
   Projection(std::shared_ptr<LogicalPlan> input, std::vector<std::shared_ptr<LogicalExpression>> expr)
       : input_{ std::move(input) },
         expr_{ std::move(expr) } { }
@@ -106,11 +125,15 @@ class Projection : public LogicalPlan {
   std::vector<std::shared_ptr<LogicalPlan>> Children() override;
 
   /**
+   * @copydoc LogicalPlan::Type()
+   */
+  LogicalPlanType Type() override;
+
+  /**
    * @copydoc LogicalPlan::ToString()
    */
   std::string ToString() override;
 
- private:
   std::shared_ptr<LogicalPlan> input_;
   std::vector<std::shared_ptr<LogicalExpression>> expr_;
 };
@@ -119,8 +142,7 @@ class Projection : public LogicalPlan {
  * @brief Selection selects (filters) the output of the input plan based on a filter expression.
  *
  */
-class Selection : public LogicalPlan {
- public:
+struct Selection : public LogicalPlan {
   Selection(std::shared_ptr<LogicalPlan> input, std::shared_ptr<LogicalExpression> filter_expr)
       : input_{ std::move(input) },
         filter_expr_{ std::move(filter_expr) } { }
@@ -140,11 +162,15 @@ class Selection : public LogicalPlan {
   std::vector<std::shared_ptr<LogicalPlan>> Children() override;
 
   /**
+   * @copydoc LogicalPlan::Type()
+   */
+  LogicalPlanType Type() override;
+
+  /**
    * @copydoc LogicalPlan::ToString()
    */
   std::string ToString() override;
 
- private:
   std::shared_ptr<LogicalPlan> input_;
   std::shared_ptr<LogicalExpression> filter_expr_;
 };
@@ -153,12 +179,11 @@ class Selection : public LogicalPlan {
  * @brief Aggregation plan calculates aggregates of the underlying data emitted by the input plan.
  *
  */
-class Aggregation : public LogicalPlan {
- public:
+struct Aggregation : public LogicalPlan {
   Aggregation(
       std::shared_ptr<LogicalPlan> input,
       std::vector<std::shared_ptr<LogicalExpression>> grouping_expr,
-      std::vector<std::shared_ptr<LogicalExpression>> aggregation_expr)
+      std::vector<std::shared_ptr<AggregateExpression>> aggregation_expr)
       : input_{ std::move(input) },
         grouping_expr_{ std::move(grouping_expr) },
         aggregation_expr_{ std::move(aggregation_expr) } { }
@@ -178,14 +203,18 @@ class Aggregation : public LogicalPlan {
   std::vector<std::shared_ptr<LogicalPlan>> Children() override;
 
   /**
+   * @copydoc LogicalPlan::Type()
+   */
+  LogicalPlanType Type() override;
+
+  /**
    * @copydoc LogicalPlan::ToString()
    */
   std::string ToString() override;
 
- private:
   std::shared_ptr<LogicalPlan> input_;
   std::vector<std::shared_ptr<LogicalExpression>> grouping_expr_;
-  std::vector<std::shared_ptr<LogicalExpression>> aggregation_expr_;
+  std::vector<std::shared_ptr<AggregateExpression>> aggregation_expr_;
 };
 
 }  // namespace logicalplan

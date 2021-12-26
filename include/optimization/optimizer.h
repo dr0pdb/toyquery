@@ -1,6 +1,8 @@
 #ifndef OPTIMIZATION_OPTIMIZER_H
 #define OPTIMIZATION_OPTIMIZER_H
 
+#include <unordered_set>
+
 #include "common/macros.h"
 #include "logicalplan/logicalplan.h"
 
@@ -22,7 +24,7 @@ class OptimizerRule {
    * @param logical_plan: the plan to optimize
    * @return std::shared_ptr<toyquery::logicalplan::LogicalPlan>: the optimized plan
    */
-  virtual std::shared_ptr<toyquery::logicalplan::LogicalPlan> Optimize(
+  virtual absl::StatusOr<std::shared_ptr<toyquery::logicalplan::LogicalPlan>> Optimize(
       std::shared_ptr<toyquery::logicalplan::LogicalPlan> logical_plan) = 0;
 
  private:
@@ -41,10 +43,13 @@ class ProjectionPushDownRule : public OptimizerRule {
   /**
    * @copydoc OptimizerRule::Optimize
    */
-  std::shared_ptr<toyquery::logicalplan::LogicalPlan> Optimize(
+  absl::StatusOr<std::shared_ptr<toyquery::logicalplan::LogicalPlan>> Optimize(
       std::shared_ptr<toyquery::logicalplan::LogicalPlan> logical_plan) override;
 
  private:
+  absl::StatusOr<std::shared_ptr<toyquery::logicalplan::LogicalPlan>> pushDown(
+      std::shared_ptr<toyquery::logicalplan::LogicalPlan> logical_plan,
+      std::unordered_set<std::string> column_names);
 };
 
 }  // namespace optimization

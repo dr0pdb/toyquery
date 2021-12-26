@@ -18,12 +18,12 @@ using ::toyquery::logicalplan::LogicalPlan;
 
 }  // namespace
 
-absl::StatusOr<std::unordered_set<std::string>> ExtractColumns(
+absl::Status ExtractColumns(
     std::vector<std::shared_ptr<LogicalExpression>> expressions,
-    std::shared_ptr<LogicalPlan> input) {
-  std::unordered_set<std::string> accumulator;
+    std::shared_ptr<LogicalPlan> input,
+    std::unordered_set<std::string>& accumulator) {
   for (auto& expr : expressions) { CHECK_OK_OR_RETURN(ExtractColumns(expr, input, accumulator)); }
-  return accumulator;
+  return absl::OkStatus();
 }
 
 absl::Status ExtractColumns(

@@ -11,6 +11,7 @@
 namespace toyquery {
 namespace dataframe {
 
+using ::toyquery::logicalplan::AggregateExpression;
 using ::toyquery::logicalplan::LogicalExpression;
 using ::toyquery::logicalplan::LogicalPlan;
 
@@ -48,7 +49,7 @@ class DataFrame {
    */
   virtual std::shared_ptr<DataFrame> Aggregate(
       std::vector<std::shared_ptr<LogicalExpression>> group_by,
-      std::vector<std::shared_ptr<LogicalExpression>> aggregate_expr) = 0;
+      std::vector<std::shared_ptr<AggregateExpression>> aggregate_expr) = 0;
 
   /**
    * @brief Get the schema of the dataframe
@@ -89,7 +90,7 @@ class DataFrameImpl : public DataFrame {
    */
   std::shared_ptr<DataFrame> Aggregate(
       std::vector<std::shared_ptr<LogicalExpression>> group_by,
-      std::vector<std::shared_ptr<LogicalExpression>> aggregate_expr) override;
+      std::vector<std::shared_ptr<AggregateExpression>> aggregate_expr) override;
 
   /**
    * @copydoc DataFrame::GetSchema

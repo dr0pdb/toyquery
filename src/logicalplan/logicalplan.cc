@@ -14,6 +14,8 @@ absl::StatusOr<std::shared_ptr<arrow::Schema>> Scan::Schema() {
 
 std::vector<std::shared_ptr<LogicalPlan>> Scan::Children() { return {}; }
 
+LogicalPlanType Scan::Type() { return LogicalPlanType::Scan; }
+
 std::string Scan::ToString() { return "todo"; }
 
 absl::StatusOr<std::shared_ptr<arrow::Schema>> Projection::Schema() {
@@ -29,11 +31,15 @@ absl::StatusOr<std::shared_ptr<arrow::Schema>> Projection::Schema() {
 
 std::vector<std::shared_ptr<LogicalPlan>> Projection::Children() { return {}; }
 
+LogicalPlanType Projection::Type() { return LogicalPlanType::Projection; }
+
 std::string Projection::ToString() { return "todo"; }
 
 absl::StatusOr<std::shared_ptr<arrow::Schema>> Selection::Schema() { return input_->Schema(); }
 
 std::vector<std::shared_ptr<LogicalPlan>> Selection::Children() { return { input_ }; }
+
+LogicalPlanType Selection::Type() { return LogicalPlanType::Selection; }
 
 std::string Selection::ToString() { return "todo"; }
 
@@ -54,6 +60,8 @@ absl::StatusOr<std::shared_ptr<arrow::Schema>> Aggregation::Schema() {
 }
 
 std::vector<std::shared_ptr<LogicalPlan>> Aggregation::Children() { return { input_ }; }
+
+LogicalPlanType Aggregation::Type() { return LogicalPlanType::Aggregation; }
 
 std::string Aggregation::ToString() { return "todo"; }
 
