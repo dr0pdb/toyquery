@@ -9,6 +9,7 @@ set(sources
   src/physicalplan/accumulator.cc
   src/physicalplan/physicalexpression.cc
   src/physicalplan/physicalplan.cc
+  src/sql/parser.cc
   src/sql/tokenizer.cc
   src/toyquery.cc
 )
@@ -36,6 +37,8 @@ set(headers
     include/physicalplan/physicalplan.h
     include/logicalplan/logicalexpression.h
     include/logicalplan/logicalplan.h
+    include/sql/expressions.h
+    include/sql/parser.h
     include/sql/tokenizer.h
     include/sql/tokens.h
     include/toyquery.h
