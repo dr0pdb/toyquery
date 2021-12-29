@@ -129,7 +129,25 @@ struct SqlSort : public SqlExpression {
 struct SqlRelation : public SqlExpression { };
 
 struct SqlSelect : public SqlRelation {
-  SqlSelect();
+  SqlSelect(
+      std::vector<std::shared_ptr<SqlExpression>> projection,
+      std::shared_ptr<SqlExpression> selection,
+      std::vector<std::shared_ptr<SqlExpression>> group_by,
+      std::vector<std::shared_ptr<SqlExpression>> order_by,
+      std::shared_ptr<SqlExpression> having,
+      std::string table_name);
+
+  /**
+   * @copydoc SqlExpression::ToString
+   */
+  std::string ToString() override;
+
+  std::vector<std::shared_ptr<SqlExpression>> projection_;
+  std::shared_ptr<SqlExpression> selection_;
+  std::vector<std::shared_ptr<SqlExpression>> group_by_;
+  std::vector<std::shared_ptr<SqlExpression>> order_by_;
+  std::shared_ptr<SqlExpression> having_;
+  std::string table_name_;
 };
 
 }  // namespace sql
