@@ -13,6 +13,8 @@ namespace sql {
  *
  */
 struct SqlExpression {
+  virtual ~SqlExpression() = default;
+
   /**
    * @brief Get the string representation for debugging
    *

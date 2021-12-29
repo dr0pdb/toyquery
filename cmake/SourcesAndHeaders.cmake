@@ -9,6 +9,7 @@ set(sources
   src/physicalplan/accumulator.cc
   src/physicalplan/physicalexpression.cc
   src/physicalplan/physicalplan.cc
+  src/sql/expressions.cc
   src/sql/parser.cc
   src/sql/tokenizer.cc
   src/toyquery.cc
