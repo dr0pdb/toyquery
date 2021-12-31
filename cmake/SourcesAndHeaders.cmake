@@ -27,6 +27,7 @@ set(headers
     include/common/key.h
     include/common/macros.h
     include/common/status.h
+    include/common/utils.h
     include/dataframe/dataframe.h
     include/datasource/datasource.h
     include/execution/execution_context.h

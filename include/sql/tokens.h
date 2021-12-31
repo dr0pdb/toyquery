@@ -68,14 +68,18 @@ enum class TokenType {
   KEYWORD_OR,
   KEYWORD_AS,
   KEYWORD_ASC,
-  KEYWORD_DESC
+  KEYWORD_DESC,
+  KEYWORD_MAX,
+  KEYWORD_MIN,
+  KEYWORD_SUM
 };
 
 static std::unordered_map<absl::string_view, TokenType> keywords = {
   { "SELECT", TokenType::KEYWORD_SELECT }, { "WHERE", TokenType::KEYWORD_WHERE }, { "ORDER", TokenType::KEYWORD_ORDER },
   { "BY", TokenType::KEYWORD_BY },         { "FROM", TokenType::KEYWORD_FROM },   { "AND", TokenType::KEYWORD_AND },
   { "OR", TokenType::KEYWORD_OR },         { "AS", TokenType::KEYWORD_AS },       { "ASC", TokenType::KEYWORD_ASC },
-  { "DESC", TokenType::KEYWORD_DESC }
+  { "DESC", TokenType::KEYWORD_DESC },     { "MAX", TokenType::KEYWORD_MAX },     { "MIN", TokenType::KEYWORD_MIN },
+  { "SUM", TokenType::KEYWORD_SUM }
 };
 
 /**

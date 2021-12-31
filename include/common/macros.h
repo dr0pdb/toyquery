@@ -18,6 +18,9 @@ namespace toyquery {
   TypeName(const TypeName&);               \
   void operator=(const TypeName&)
 
+#define RETURN_IF_NULL(expr) \
+  if (expr == nullptr) { return nullptr; }
+
 #define CHECK_OK_OR_RETURN(rhs) CHECK_OK_OR_RETURN_IMPL(STATUS_MACROS_IMPL_CONCAT_(tmp, __LINE__), rhs)
 
 #define CHECK_OK_OR_RETURN_IMPL(tmp, rhs) \

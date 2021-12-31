@@ -6,3 +6,6 @@
 A toy query engine written for learning purposes.
 
 ## Features
+
+### Building
+You need g++ 11 or above to build the project.

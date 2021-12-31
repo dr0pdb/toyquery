@@ -30,10 +30,20 @@ class Parser {
   int nextPrecedence();
 
   // Parse the next prefix operation
-  absl::StatusOr<std::shared_ptr<SqlExpression>> ParsePrefix();
+  absl::StatusOr<std::shared_ptr<SqlExpression>> parsePrefix();
 
   // Parse the next infix operation
-  absl::StatusOr<std::shared_ptr<SqlExpression>> ParseInfix(std::shared_ptr<SqlExpression> left, int precedence);
+  absl::StatusOr<std::shared_ptr<SqlExpression>> parseInfix(std::shared_ptr<SqlExpression> left, int precedence);
+
+  absl::StatusOr<std::shared_ptr<SqlExpression>> parseSelect();
+
+  absl::Status expect(TokenType expected_type);
+
+  Token current();
+  void advance();
+
+  // Check if we are at the end of the token stream.
+  bool isAtEnd();
 
   std::vector<Token> tokens_;
   int token_idx_{ 0 };

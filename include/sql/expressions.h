@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 
+#include "absl/strings/string_view.h"
+
 namespace toyquery {
 namespace sql {
 
@@ -24,14 +26,14 @@ struct SqlExpression {
 };
 
 struct SqlIdentifier : public SqlExpression {
-  SqlIdentifier(std::string id);
+  SqlIdentifier(absl::string_view id);
 
   /**
    * @copydoc SqlExpression::ToString
    */
   std::string ToString() override;
 
-  std::string id_;
+  absl::string_view id_;
 };
 
 struct SqlBinaryExpression : public SqlExpression {
@@ -43,7 +45,7 @@ struct SqlBinaryExpression : public SqlExpression {
   std::string ToString() override;
 
   std::shared_ptr<SqlExpression> left_;
-  std::string op_;
+  absl::string_view op_;
   std::shared_ptr<SqlExpression> right_;
 };
 
@@ -59,14 +61,14 @@ struct SqlLong : public SqlExpression {
 };
 
 struct SqlString : public SqlExpression {
-  SqlString(std::string value);
+  SqlString(absl::string_view value);
 
   /**
    * @copydoc SqlExpression::ToString
    */
   std::string ToString() override;
 
-  std::string value_;
+  absl::string_view value_;
 };
 
 struct SqlDouble : public SqlExpression {
@@ -81,14 +83,14 @@ struct SqlDouble : public SqlExpression {
 };
 
 struct SqlFunction : public SqlExpression {
-  SqlFunction(std::string id, std::vector<std::shared_ptr<SqlExpression>> args);
+  SqlFunction(absl::string_view id, std::vector<std::shared_ptr<SqlExpression>> args);
 
   /**
    * @copydoc SqlExpression::ToString
    */
   std::string ToString() override;
 
-  std::string id_;
+  absl::string_view id_;
   std::vector<std::shared_ptr<SqlExpression>> args_;
 };
 
@@ -137,7 +139,7 @@ struct SqlSelect : public SqlRelation {
       std::vector<std::shared_ptr<SqlExpression>> group_by,
       std::vector<std::shared_ptr<SqlExpression>> order_by,
       std::shared_ptr<SqlExpression> having,
-      std::string table_name);
+      absl::string_view table_name);
 
   /**
    * @copydoc SqlExpression::ToString
@@ -149,7 +151,7 @@ struct SqlSelect : public SqlRelation {
   std::vector<std::shared_ptr<SqlExpression>> group_by_;
   std::vector<std::shared_ptr<SqlExpression>> order_by_;
   std::shared_ptr<SqlExpression> having_;
-  std::string table_name_;
+  absl::string_view table_name_;
 };
 
 }  // namespace sql
