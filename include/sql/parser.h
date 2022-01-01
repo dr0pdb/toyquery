@@ -37,9 +37,19 @@ class Parser {
 
   absl::StatusOr<std::shared_ptr<SqlExpression>> parseSelect();
 
+  absl::StatusOr<std::vector<std::shared_ptr<SqlSort>>> parseOrder();
+
+  absl::StatusOr<std::vector<std::shared_ptr<SqlExpression>>> parseExpressionList();
+
+  absl::StatusOr<std::shared_ptr<SqlExpression>> parseExpression();
+
+  bool match(TokenType expected_type);
+  bool matchMultiple(std::vector<TokenType> expected_types);
+  bool matchKeyword(absl::string_view keyword);
   absl::Status expect(TokenType expected_type);
 
   Token current();
+  Token peek(int jump);  // peek (0) = current()
   void advance();
 
   // Check if we are at the end of the token stream.

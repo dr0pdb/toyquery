@@ -71,7 +71,9 @@ enum class TokenType {
   KEYWORD_DESC,
   KEYWORD_MAX,
   KEYWORD_MIN,
-  KEYWORD_SUM
+  KEYWORD_SUM,
+  KEYWORD_GROUP,
+  KEYWORD_HAVING
 };
 
 static std::unordered_map<absl::string_view, TokenType> keywords = {
@@ -79,7 +81,7 @@ static std::unordered_map<absl::string_view, TokenType> keywords = {
   { "BY", TokenType::KEYWORD_BY },         { "FROM", TokenType::KEYWORD_FROM },   { "AND", TokenType::KEYWORD_AND },
   { "OR", TokenType::KEYWORD_OR },         { "AS", TokenType::KEYWORD_AS },       { "ASC", TokenType::KEYWORD_ASC },
   { "DESC", TokenType::KEYWORD_DESC },     { "MAX", TokenType::KEYWORD_MAX },     { "MIN", TokenType::KEYWORD_MIN },
-  { "SUM", TokenType::KEYWORD_SUM }
+  { "SUM", TokenType::KEYWORD_SUM },       { "GROUP", TokenType::KEYWORD_GROUP }, { "HAVING", TokenType::KEYWORD_HAVING }
 };
 
 /**

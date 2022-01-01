@@ -10,12 +10,32 @@
 namespace toyquery {
 namespace sql {
 
+enum class SqlExpressionType {
+  SqlIdentifier,
+  SqlBinaryExpression,
+  SqlLong,
+  SqlString,
+  SqlDouble,
+  SqlFunction,
+  SqlAlias,
+  SqlCast,
+  SqlSort,
+  SqlSelect
+};
+
 /**
  * @brief The base structure for all sql expressions.
  *
  */
 struct SqlExpression {
   virtual ~SqlExpression() = default;
+
+  /**
+   * @brief Get the Type object
+   *
+   * @return SqlExpressionType: the type of sql expression
+   */
+  virtual SqlExpressionType GetType() = 0;
 
   /**
    * @brief Get the string representation for debugging
@@ -29,6 +49,11 @@ struct SqlIdentifier : public SqlExpression {
   SqlIdentifier(absl::string_view id);
 
   /**
+   * @copydoc SqlExpression::GetType
+   */
+  SqlExpressionType GetType() override;
+
+  /**
    * @copydoc SqlExpression::ToString
    */
   std::string ToString() override;
@@ -38,6 +63,11 @@ struct SqlIdentifier : public SqlExpression {
 
 struct SqlBinaryExpression : public SqlExpression {
   SqlBinaryExpression(std::shared_ptr<SqlExpression> left, std::string op, std::shared_ptr<SqlExpression> right);
+
+  /**
+   * @copydoc SqlExpression::GetType
+   */
+  SqlExpressionType GetType() override;
 
   /**
    * @copydoc SqlExpression::ToString
@@ -53,6 +83,11 @@ struct SqlLong : public SqlExpression {
   SqlLong(long value);
 
   /**
+   * @copydoc SqlExpression::GetType
+   */
+  SqlExpressionType GetType() override;
+
+  /**
    * @copydoc SqlExpression::ToString
    */
   std::string ToString() override;
@@ -62,6 +97,11 @@ struct SqlLong : public SqlExpression {
 
 struct SqlString : public SqlExpression {
   SqlString(absl::string_view value);
+
+  /**
+   * @copydoc SqlExpression::GetType
+   */
+  SqlExpressionType GetType() override;
 
   /**
    * @copydoc SqlExpression::ToString
@@ -75,6 +115,11 @@ struct SqlDouble : public SqlExpression {
   SqlDouble(double value);
 
   /**
+   * @copydoc SqlExpression::GetType
+   */
+  SqlExpressionType GetType() override;
+
+  /**
    * @copydoc SqlExpression::ToString
    */
   std::string ToString() override;
@@ -84,6 +129,11 @@ struct SqlDouble : public SqlExpression {
 
 struct SqlFunction : public SqlExpression {
   SqlFunction(absl::string_view id, std::vector<std::shared_ptr<SqlExpression>> args);
+
+  /**
+   * @copydoc SqlExpression::GetType
+   */
+  SqlExpressionType GetType() override;
 
   /**
    * @copydoc SqlExpression::ToString
@@ -98,6 +148,11 @@ struct SqlAlias : public SqlExpression {
   SqlAlias(std::shared_ptr<SqlExpression> expr, std::shared_ptr<SqlIdentifier> alias);
 
   /**
+   * @copydoc SqlExpression::GetType
+   */
+  SqlExpressionType GetType() override;
+
+  /**
    * @copydoc SqlExpression::ToString
    */
   std::string ToString() override;
@@ -110,6 +165,11 @@ struct SqlCast : public SqlExpression {
   SqlCast(std::shared_ptr<SqlExpression> expr, std::shared_ptr<SqlIdentifier> data_type);
 
   /**
+   * @copydoc SqlExpression::GetType
+   */
+  SqlExpressionType GetType() override;
+
+  /**
    * @copydoc SqlExpression::ToString
    */
   std::string ToString() override;
@@ -120,6 +180,11 @@ struct SqlCast : public SqlExpression {
 
 struct SqlSort : public SqlExpression {
   SqlSort(std::shared_ptr<SqlExpression> expr, bool asc);
+
+  /**
+   * @copydoc SqlExpression::GetType
+   */
+  SqlExpressionType GetType() override;
 
   /**
    * @copydoc SqlExpression::ToString
@@ -137,9 +202,14 @@ struct SqlSelect : public SqlRelation {
       std::vector<std::shared_ptr<SqlExpression>> projection,
       std::shared_ptr<SqlExpression> selection,
       std::vector<std::shared_ptr<SqlExpression>> group_by,
-      std::vector<std::shared_ptr<SqlExpression>> order_by,
+      std::vector<std::shared_ptr<SqlSort>> order_by,
       std::shared_ptr<SqlExpression> having,
       absl::string_view table_name);
+
+  /**
+   * @copydoc SqlExpression::GetType
+   */
+  SqlExpressionType GetType() override;
 
   /**
    * @copydoc SqlExpression::ToString
@@ -149,7 +219,7 @@ struct SqlSelect : public SqlRelation {
   std::vector<std::shared_ptr<SqlExpression>> projection_;
   std::shared_ptr<SqlExpression> selection_;
   std::vector<std::shared_ptr<SqlExpression>> group_by_;
-  std::vector<std::shared_ptr<SqlExpression>> order_by_;
+  std::vector<std::shared_ptr<SqlSort>> order_by_;
   std::shared_ptr<SqlExpression> having_;
   absl::string_view table_name_;
 };
