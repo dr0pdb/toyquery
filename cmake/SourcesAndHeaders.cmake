@@ -11,6 +11,7 @@ set(sources
   src/physicalplan/physicalplan.cc
   src/sql/expressions.cc
   src/sql/parser.cc
+  src/sql/planner.cc
   src/sql/tokenizer.cc
   src/toyquery.cc
 )
@@ -41,6 +42,7 @@ set(headers
     include/logicalplan/logicalplan.h
     include/sql/expressions.h
     include/sql/parser.h
+    include/sql/planner.h
     include/sql/tokenizer.h
     include/sql/tokens.h
     include/toyquery.h
