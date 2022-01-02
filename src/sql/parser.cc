@@ -111,7 +111,7 @@ absl::StatusOr<std::vector<std::shared_ptr<SqlSort>>> Parser::parseOrder() {
   while (sort_expr != nullptr) {
     switch (sort_expr->GetType()) {
       case SqlExpressionType::SqlIdentifier: {
-        sort_expr = std::make_shared<SqlSort>(std::static_pointer_cast<SqlIdentifier>(sort_expr)->id_, true);
+        sort_expr = std::make_shared<SqlSort>(sort_expr, true);
         break;
       }
       case SqlExpressionType::SqlSort: break;  // nothing to do
