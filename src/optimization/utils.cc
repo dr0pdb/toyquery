@@ -34,7 +34,7 @@ absl::Status ExtractColumns(
     // column refs
     case LogicalExpressionType::Column: {
       auto col_expr = std::static_pointer_cast<Column>(expression);
-      accumulator.insert(col_expr->name_);
+      accumulator.insert(std::string(col_expr->name_));  // TODO: can we use absl::string_view?
       break;
     }
     case LogicalExpressionType::ColumnIndex: {

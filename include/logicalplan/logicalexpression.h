@@ -102,7 +102,7 @@ struct LogicalExpression {
  * @brief A reference to a column of a table by name.
  */
 struct Column : public LogicalExpression {
-  Column(std::string name);
+  Column(absl::string_view name) : name_{ name } { }
   ~Column();
 
   /**
@@ -120,7 +120,7 @@ struct Column : public LogicalExpression {
    */
   std::string ToString() override;
 
-  std::string name_;
+  absl::string_view name_;
 };
 
 /**
