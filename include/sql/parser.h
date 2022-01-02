@@ -37,6 +37,8 @@ class Parser {
 
   absl::StatusOr<std::shared_ptr<SqlExpression>> parseSelect();
 
+  absl::StatusOr<std::shared_ptr<SqlCast>> parseCast();
+
   absl::StatusOr<std::vector<std::shared_ptr<SqlSort>>> parseOrder();
 
   absl::StatusOr<std::shared_ptr<SqlIdentifier>> parseIdentifier();

@@ -52,6 +52,7 @@ absl::StatusOr<std::shared_ptr<SqlExpression>> Parser::parsePrefix() {
 
   switch (token.type_) {
     case TokenType::KEYWORD_SELECT: return parseSelect();
+    case TokenType::KEYWORD_CAST: return parseCast();
 
     case TokenType::KEYWORD_MAX:
     case TokenType::KEYWORD_MIN:
@@ -98,7 +99,7 @@ absl::StatusOr<std::shared_ptr<SqlExpression>> Parser::parseInfix(std::shared_pt
     case TokenType::KEYWORD_AS: {
       advance();  // consume the token
       ASSIGN_OR_RETURN(auto identifier, parseIdentifier());
-      return std::make_shared<SqlCast>(left, identifier);
+      return std::make_shared<SqlAlias>(left, identifier);
     }
 
     case TokenType::KEYWORD_ASC:
@@ -146,6 +147,14 @@ absl::StatusOr<std::shared_ptr<SqlExpression>> Parser::parseSelect() {
   } else {
     return absl::InvalidArgumentError(absl::StrCat(current().text_, " found, expected FROM"));
   }
+}
+
+absl::StatusOr<std::shared_ptr<SqlCast>> Parser::parseCast() {
+  CHECK_OK_OR_RETURN(expect(TokenType::SYMBOL_LEFT_PAREN));
+  ASSIGN_OR_RETURN(auto expr, parseExpression());
+  auto alias = std::static_pointer_cast<SqlAlias>(expr);
+  CHECK_OK_OR_RETURN(expect(TokenType::SYMBOL_RIGHT_PARENT));
+  return std::make_shared<SqlCast>(alias->expr_, alias->alias_);
 }
 
 absl::StatusOr<std::vector<std::shared_ptr<SqlSort>>> Parser::parseOrder() {
@@ -235,7 +244,17 @@ bool Parser::matchKeyword(absl::string_view keyword) {
   return false;
 }
 
-absl::Status Parser::expect(TokenType expected_type) { return absl::OkStatus(); }
+absl::Status Parser::expect(TokenType expected_type) {
+  if (isAtEnd()) { return absl::InvalidArgumentError("unexpected end of token stream"); }
+
+  auto token = current();
+  if (token.type_ == expected_type) {
+    advance();
+    return absl::OkStatus();
+  } else {
+    return absl::InvalidArgumentError("unexpected token type");
+  }
+}
 
 Token Parser::current() { return tokens_[token_idx_]; }
 
