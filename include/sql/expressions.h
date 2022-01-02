@@ -62,7 +62,7 @@ struct SqlIdentifier : public SqlExpression {
 };
 
 struct SqlBinaryExpression : public SqlExpression {
-  SqlBinaryExpression(std::shared_ptr<SqlExpression> left, std::string op, std::shared_ptr<SqlExpression> right);
+  SqlBinaryExpression(std::shared_ptr<SqlExpression> left, absl::string_view op, std::shared_ptr<SqlExpression> right);
 
   /**
    * @copydoc SqlExpression::GetType

@@ -11,7 +11,7 @@ std::string SqlIdentifier::ToString() { return "todo"; }
 
 SqlBinaryExpression::SqlBinaryExpression(
     std::shared_ptr<SqlExpression> left,
-    std::string op,
+    absl::string_view op,
     std::shared_ptr<SqlExpression> right)
     : left_{ left },
       op_{ op },

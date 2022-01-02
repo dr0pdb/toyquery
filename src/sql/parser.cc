@@ -75,7 +75,51 @@ absl::StatusOr<std::shared_ptr<SqlExpression>> Parser::parsePrefix() {
   }
 }
 
-absl::StatusOr<std::shared_ptr<SqlExpression>> Parser::parseInfix(std::shared_ptr<SqlExpression> left, int precedence) { }
+absl::StatusOr<std::shared_ptr<SqlExpression>> Parser::parseInfix(std::shared_ptr<SqlExpression> left, int precedence) {
+  auto token = current();
+
+  switch (token.type_) {
+    case TokenType::OPERATOR_PLUS:
+    case TokenType::OPERATOR_MINUS:
+    case TokenType::OPERATOR_ASTERISK:
+    case TokenType::OPERATOR_SLASH:
+    case TokenType::OPERATOR_EQUAL:
+    case TokenType::OPERATOR_GREATER_THAN:
+    case TokenType::OPERATOR_GREATER_THAN_EQUAL_TO:
+    case TokenType::OPERATOR_LESS_THAN:
+    case TokenType::OPERATOR_LESS_THAN_EQUAL_TO:
+    case TokenType::KEYWORD_AND:
+    case TokenType::KEYWORD_OR: {
+      advance();  // consume the token
+      ASSIGN_OR_RETURN(auto right_expr, Parse(precedence));
+      return std::make_shared<SqlBinaryExpression>(left, token.text_, right_expr);
+    }
+
+    case TokenType::KEYWORD_AS: {
+      advance();  // consume the token
+      ASSIGN_OR_RETURN(auto identifier, parseIdentifier());
+      return std::make_shared<SqlCast>(left, identifier);
+    }
+
+    case TokenType::KEYWORD_ASC:
+    case TokenType::KEYWORD_DESC: {
+      advance();  // consume token
+      return std::make_shared<SqlSort>(left, token.type_ == TokenType::KEYWORD_ASC);
+    }
+
+    case TokenType::SYMBOL_LEFT_PAREN: {
+      if (left->GetType() == SqlExpressionType::SqlIdentifier) {
+        advance();  // consume token
+        ASSIGN_OR_RETURN(auto args, parseExpressionList());
+        return std::make_shared<SqlFunction>(std::static_pointer_cast<SqlIdentifier>(left)->id_, args);
+      } else {
+        return absl::InvalidArgumentError("unexpected left paren");
+      }
+    }
+
+    default: return absl::InvalidArgumentError("invalid token type in parseInfix");
+  }
+}
 
 absl::StatusOr<std::shared_ptr<SqlExpression>> Parser::parseSelect() {
   ASSIGN_OR_RETURN(auto projection, parseExpressionList());
@@ -129,6 +173,16 @@ absl::StatusOr<std::vector<std::shared_ptr<SqlSort>>> Parser::parseOrder() {
   }
 
   return sort_list;
+}
+
+absl::StatusOr<std::shared_ptr<SqlIdentifier>> Parser::parseIdentifier() {
+  if (isAtEnd()) { return absl::InvalidArgumentError("end of token stream, expected an identifier"); }
+
+  ASSIGN_OR_RETURN(auto expr, parseExpression());
+  switch (expr->GetType()) {
+    case SqlExpressionType::SqlIdentifier: return std::static_pointer_cast<SqlIdentifier>(expr);
+    default: return absl::InvalidArgumentError("expected an identifier");
+  }
 }
 
 absl::StatusOr<std::vector<std::shared_ptr<SqlExpression>>> Parser::parseExpressionList() {
