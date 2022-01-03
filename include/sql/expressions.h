@@ -10,6 +10,9 @@
 namespace toyquery {
 namespace sql {
 
+/**
+ * @brief Indicates the type of the SqlExpression.
+ */
 enum class SqlExpressionType {
   SqlIdentifier,
   SqlBinaryExpression,
@@ -222,6 +225,37 @@ struct SqlSelect : public SqlRelation {
   std::vector<std::shared_ptr<SqlSort>> order_by_;
   std::shared_ptr<SqlExpression> having_;
   absl::string_view table_name_;
+};
+
+/**
+ * @brief All the possible operators supported in the SqlBinaryExpression.
+ *
+ * Useful for switch cases.
+ */
+enum class SqlBinaryExpressionOperator {
+  And,
+  Or,
+  Equal,
+  NotEqual,
+  GreaterThan,
+  GreaterThanEquals,
+  LessThan,
+  LessThanEquals,
+  Plus,
+  Minus,
+  Multiplication,
+  Division,
+  Modulo
+};
+
+static std::unordered_map<absl::string_view, SqlBinaryExpressionOperator> operators = {
+  { "AND", SqlBinaryExpressionOperator::And },          { "OR", SqlBinaryExpressionOperator::Or },
+  { "=", SqlBinaryExpressionOperator::Equal },          { "!=", SqlBinaryExpressionOperator::NotEqual },
+  { ">", SqlBinaryExpressionOperator::GreaterThan },    { ">=", SqlBinaryExpressionOperator::GreaterThanEquals },
+  { "<", SqlBinaryExpressionOperator::LessThan },       { "<=", SqlBinaryExpressionOperator::LessThanEquals },
+  { "+", SqlBinaryExpressionOperator::Plus },           { "-", SqlBinaryExpressionOperator::Minus },
+  { "*", SqlBinaryExpressionOperator::Multiplication }, { "/", SqlBinaryExpressionOperator::Division },
+  { "%", SqlBinaryExpressionOperator::Modulo }
 };
 
 }  // namespace sql

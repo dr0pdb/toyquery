@@ -127,7 +127,8 @@ struct Column : public LogicalExpression {
  * @brief A reference to a column of a table by index.
  */
 struct ColumnIndex : public LogicalExpression {
-  ColumnIndex(int index);
+  ColumnIndex(int index) : index_{ index } { }
+
   ~ColumnIndex();
 
   /**
@@ -152,7 +153,7 @@ struct ColumnIndex : public LogicalExpression {
  * @brief A literal string expression.
  */
 struct LiteralString : public LogicalExpression {
-  LiteralString(std::string value);
+  LiteralString(absl::string_view value) : value_{ value } { }
   ~LiteralString();
 
   /**
@@ -170,14 +171,14 @@ struct LiteralString : public LogicalExpression {
    */
   std::string ToString() override;
 
-  std::string value_;
+  absl::string_view value_;
 };
 
 /**
  * @brief A literal int64 expression.
  */
 struct LiteralLong : public LogicalExpression {
-  LiteralLong(int64_t value);
+  LiteralLong(int64_t value) : value_{ value } { }
   ~LiteralLong();
 
   /**
@@ -202,7 +203,7 @@ struct LiteralLong : public LogicalExpression {
  * @brief A literal double expression.
  */
 struct LiteralDouble : public LogicalExpression {
-  LiteralDouble(double value);
+  LiteralDouble(double value) : value_{ value } { }
   ~LiteralDouble();
 
   /**
@@ -255,7 +256,7 @@ struct Cast : public LogicalExpression {
  * Format: expr AS alias
  */
 struct Alias : public LogicalExpression {
-  Alias(std::shared_ptr<LogicalExpression> expr, std::string alias)
+  Alias(std::shared_ptr<LogicalExpression> expr, absl::string_view alias)
       : expr_{ std::move(expr) },
         alias_{ std::move(alias) } { }
   ~Alias();
@@ -267,7 +268,7 @@ struct Alias : public LogicalExpression {
    */
   absl::StatusOr<std::shared_ptr<arrow::Field>> ToField(std::shared_ptr<LogicalPlan> input) override {
     ASSIGN_OR_RETURN(std::shared_ptr<arrow::Field> field, expr_->ToField(input));
-    return std::make_shared<arrow::Field>(alias_, field->type());
+    return std::make_shared<arrow::Field>(std::string(alias_), field->type());
   }
 
   /**
@@ -281,7 +282,7 @@ struct Alias : public LogicalExpression {
   std::string ToString() override { return "todo"; }
 
   std::shared_ptr<LogicalExpression> expr_;
-  std::string alias_;
+  absl::string_view alias_;
 };
 
 /**
