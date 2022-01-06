@@ -32,6 +32,8 @@ class SqlPlanner {
   absl::StatusOr<std::shared_ptr<toyquery::logicalplan::LogicalExpression>> createLogicalExpression(
       std::shared_ptr<SqlExpression> expr,
       std::shared_ptr<toyquery::dataframe::DataFrame> input);
+
+  absl::StatusOr<std::shared_ptr<arrow::DataType>> parseDataType(absl::string_view type_string);
 };
 
 }  // namespace sql

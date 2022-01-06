@@ -248,7 +248,7 @@ enum class SqlBinaryExpressionOperator {
   Modulo
 };
 
-static std::unordered_map<absl::string_view, SqlBinaryExpressionOperator> operators = {
+static std::unordered_map<absl::string_view, SqlBinaryExpressionOperator> OPERATORS = {
   { "AND", SqlBinaryExpressionOperator::And },          { "OR", SqlBinaryExpressionOperator::Or },
   { "=", SqlBinaryExpressionOperator::Equal },          { "!=", SqlBinaryExpressionOperator::NotEqual },
   { ">", SqlBinaryExpressionOperator::GreaterThan },    { ">=", SqlBinaryExpressionOperator::GreaterThanEquals },
@@ -257,6 +257,19 @@ static std::unordered_map<absl::string_view, SqlBinaryExpressionOperator> operat
   { "*", SqlBinaryExpressionOperator::Multiplication }, { "/", SqlBinaryExpressionOperator::Division },
   { "%", SqlBinaryExpressionOperator::Modulo }
 };
+
+/**
+ * @brief All the possible functions.
+ *
+ * Useful for switch cases.
+ */
+enum class SqlFunctionType { Sum, Min, Max, Avg, Count };
+
+static std::unordered_map<absl::string_view, SqlFunctionType> FUNCTIONS = { { "SUM", SqlFunctionType::Sum },
+                                                                            { "MIN", SqlFunctionType::Min },
+                                                                            { "MAX", SqlFunctionType::Max },
+                                                                            { "AVG", SqlFunctionType::Avg },
+                                                                            { "COUNT", SqlFunctionType::Count } };
 
 }  // namespace sql
 }  // namespace toyquery
