@@ -4,9 +4,11 @@ namespace toyquery {
 namespace sql {
 
 using ::toyquery::logicalplan::Add;
+using ::toyquery::logicalplan::AggregateExpression;
 using ::toyquery::logicalplan::Alias;
 using ::toyquery::logicalplan::And;
 using ::toyquery::logicalplan::Avg;
+using ::toyquery::logicalplan::BinaryExpression;
 using ::toyquery::logicalplan::Cast;
 using ::toyquery::logicalplan::Column;
 using ::toyquery::logicalplan::Count;
@@ -18,6 +20,7 @@ using ::toyquery::logicalplan::LiteralDouble;
 using ::toyquery::logicalplan::LiteralLong;
 using ::toyquery::logicalplan::LiteralString;
 using ::toyquery::logicalplan::LogicalExpression;
+using ::toyquery::logicalplan::LogicalExpressionType;
 using ::toyquery::logicalplan::Lt;
 using ::toyquery::logicalplan::LtEq;
 using ::toyquery::logicalplan::Max;
@@ -36,6 +39,80 @@ absl::StatusOr<std::shared_ptr<toyquery::dataframe::DataFrame>> SqlPlanner::Crea
     return absl::NotFoundError("table not found in the sql statement");
   }
   auto table = tables[select->table_name_];
+
+  // convert all projections to logical expressions
+  std::vector<std::shared_ptr<toyquery::logicalplan::LogicalExpression>> projection_exprs;
+  for (auto& proj_expr : select->projection_) {
+    ASSIGN_OR_RETURN(auto proj_logical_expr, createLogicalExpression(proj_expr, table));
+    projection_exprs.push_back(std::move(proj_logical_expr));
+  }
+
+  // get all the columns referenced in the projection
+  ASSIGN_OR_RETURN(auto referenced_columns, getReferencedColumns(projection_exprs));
+}
+
+absl::StatusOr<std::unordered_set<absl::string_view>> SqlPlanner::getReferencedColumns(
+    std::vector<std::shared_ptr<toyquery::logicalplan::LogicalExpression>> projection_exprs) {
+  std::unordered_set<absl::string_view> accum;
+  for (auto& projection_expr : projection_exprs) { CHECK_OK_OR_RETURN(getColumnFromExpr(projection_expr, accum)); }
+  return accum;
+}
+
+absl::Status SqlPlanner::getColumnFromExpr(
+    std::shared_ptr<toyquery::logicalplan::LogicalExpression> expr,
+    std::unordered_set<absl::string_view>& accumulator) {
+  switch (expr->type()) {
+    case LogicalExpressionType::Column: {
+      auto col_expr = std::static_pointer_cast<Column>(expr);
+      accumulator.insert(col_expr->name_);
+      break;
+    }
+    case LogicalExpressionType::Alias: {
+      auto alias_expr = std::static_pointer_cast<Alias>(expr);
+      CHECK_OK_OR_RETURN(getColumnFromExpr(alias_expr->expr_, accumulator));
+      break;
+    }
+    case LogicalExpressionType::Cast: {
+      auto cast_expr = std::static_pointer_cast<Cast>(expr);
+      CHECK_OK_OR_RETURN(getColumnFromExpr(cast_expr->expr_, accumulator));
+      break;
+    }
+
+    // binary expressions
+    case LogicalExpressionType::And:
+    case LogicalExpressionType::Or:
+    case LogicalExpressionType::Eq:
+    case LogicalExpressionType::Neq:
+    case LogicalExpressionType::Gt:
+    case LogicalExpressionType::GtEq:
+    case LogicalExpressionType::Lt:
+    case LogicalExpressionType::LtEq:
+    case LogicalExpressionType::Add:
+    case LogicalExpressionType::Subtract:
+    case LogicalExpressionType::Multiply:
+    case LogicalExpressionType::Divide:
+    case LogicalExpressionType::Modulus: {
+      auto binary_expr = std::static_pointer_cast<BinaryExpression>(expr);
+      CHECK_OK_OR_RETURN(getColumnFromExpr(binary_expr->left_, accumulator));
+      CHECK_OK_OR_RETURN(getColumnFromExpr(binary_expr->right_, accumulator));
+      break;
+    }
+
+    // aggregation expressions
+    case LogicalExpressionType::Sum:
+    case LogicalExpressionType::Avg:
+    case LogicalExpressionType::Max:
+    case LogicalExpressionType::Min:
+    case LogicalExpressionType::Count: {
+      auto aggr_expr = std::static_pointer_cast<AggregateExpression>(expr);
+      CHECK_OK_OR_RETURN(getColumnFromExpr(aggr_expr->expr_, accumulator));
+      break;
+    }
+
+    default: return absl::InvalidArgumentError("invalid logical expression for extracting columns from");
+  }
+
+  return absl::OkStatus();
 }
 
 absl::StatusOr<std::shared_ptr<toyquery::logicalplan::LogicalExpression>> SqlPlanner::createLogicalExpression(
@@ -117,6 +194,7 @@ absl::StatusOr<std::shared_ptr<toyquery::logicalplan::LogicalExpression>> SqlPla
           ASSIGN_OR_RETURN(auto count_input, createLogicalExpression(func_expr->args_[0], input));
           return std::make_shared<Count>(count_input);
         }
+        default: return absl::InvalidArgumentError("invalid function id");
       }
     }
 
