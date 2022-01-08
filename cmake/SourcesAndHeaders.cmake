@@ -40,6 +40,7 @@ set(headers
     include/physicalplan/physicalplan.h
     include/logicalplan/logicalexpression.h
     include/logicalplan/logicalplan.h
+    include/logicalplan/utils.h
     include/sql/expressions.h
     include/sql/parser.h
     include/sql/planner.h

@@ -37,6 +37,9 @@ class SqlPlanner {
       std::shared_ptr<toyquery::logicalplan::LogicalExpression> expr,
       std::unordered_set<absl::string_view>& accumulator);
 
+  absl::StatusOr<int> countAggregationExpressions(
+      std::vector<std::shared_ptr<toyquery::logicalplan::LogicalExpression>> projection_exprs);
+
   absl::StatusOr<std::shared_ptr<toyquery::logicalplan::LogicalExpression>> createLogicalExpression(
       std::shared_ptr<SqlExpression> expr,
       std::shared_ptr<toyquery::dataframe::DataFrame> input);

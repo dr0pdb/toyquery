@@ -1,5 +1,7 @@
 #include "sql/planner.h"
 
+#include "logicalplan/utils.h"
+
 namespace toyquery {
 namespace sql {
 
@@ -16,6 +18,7 @@ using ::toyquery::logicalplan::Divide;
 using ::toyquery::logicalplan::Eq;
 using ::toyquery::logicalplan::Gt;
 using ::toyquery::logicalplan::GtEq;
+using ::toyquery::logicalplan::IsAggregateExpression;
 using ::toyquery::logicalplan::LiteralDouble;
 using ::toyquery::logicalplan::LiteralLong;
 using ::toyquery::logicalplan::LiteralString;
@@ -49,6 +52,11 @@ absl::StatusOr<std::shared_ptr<toyquery::dataframe::DataFrame>> SqlPlanner::Crea
 
   // get all the columns referenced in the projection
   ASSIGN_OR_RETURN(auto referenced_columns, getReferencedColumns(projection_exprs));
+
+  ASSIGN_OR_RETURN(auto aggregation_expr_count, countAggregationExpressions(projection_exprs));
+  if (aggregation_expr_count == 0 && !select->group_by_.empty()) {
+    return absl::InvalidArgumentError("GROUP BY without aggregate expressions are not supported");
+  }
 }
 
 absl::StatusOr<std::unordered_set<absl::string_view>> SqlPlanner::getReferencedColumns(
@@ -113,6 +121,13 @@ absl::Status SqlPlanner::getColumnFromExpr(
   }
 
   return absl::OkStatus();
+}
+
+absl::StatusOr<int> SqlPlanner::countAggregationExpressions(
+    std::vector<std::shared_ptr<toyquery::logicalplan::LogicalExpression>> projection_exprs) {
+  int count = 0;
+  for (auto& proj_expr : projection_exprs) { count += IsAggregateExpression(proj_expr) ? 1 : 0; }
+  return count;
 }
 
 absl::StatusOr<std::shared_ptr<toyquery::logicalplan::LogicalExpression>> SqlPlanner::createLogicalExpression(
