@@ -33,6 +33,10 @@ class SqlPlanner {
   absl::StatusOr<std::unordered_set<absl::string_view>> getReferencedColumns(
       std::vector<std::shared_ptr<toyquery::logicalplan::LogicalExpression>> projection_exprs);
 
+  absl::StatusOr<std::unordered_set<absl::string_view>> getReferencedColumnsBySelection(
+      std::shared_ptr<SqlSelect> select,
+      std::shared_ptr<toyquery::dataframe::DataFrame> table);
+
   absl::Status getColumnFromExpr(
       std::shared_ptr<toyquery::logicalplan::LogicalExpression> expr,
       std::unordered_set<absl::string_view>& accumulator);

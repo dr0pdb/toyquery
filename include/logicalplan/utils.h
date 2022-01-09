@@ -50,6 +50,8 @@ bool IsAggregateExpression(std::shared_ptr<toyquery::logicalplan::LogicalExpress
       auto binary_expr = std::static_pointer_cast<BinaryExpression>(expr);
       return IsAggregateExpression(binary_expr->left_) || IsAggregateExpression(binary_expr->right_);
     }
+
+    default: return false;
   }
 
   return false;

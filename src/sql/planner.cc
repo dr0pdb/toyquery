@@ -51,11 +51,18 @@ absl::StatusOr<std::shared_ptr<toyquery::dataframe::DataFrame>> SqlPlanner::Crea
   }
 
   // get all the columns referenced in the projection
-  ASSIGN_OR_RETURN(auto referenced_columns, getReferencedColumns(projection_exprs));
+  ASSIGN_OR_RETURN(auto referenced_columns_in_projection, getReferencedColumns(projection_exprs));
 
   ASSIGN_OR_RETURN(auto aggregation_expr_count, countAggregationExpressions(projection_exprs));
   if (aggregation_expr_count == 0 && !select->group_by_.empty()) {
     return absl::InvalidArgumentError("GROUP BY without aggregate expressions are not supported");
+  }
+
+  ASSIGN_OR_RETURN(auto referenced_columns_in_selection, getReferencedColumnsBySelection(select, table));
+
+  auto plan = table;
+  if (aggregation_expr_count == 0) {
+  } else {
   }
 }
 
@@ -63,6 +70,20 @@ absl::StatusOr<std::unordered_set<absl::string_view>> SqlPlanner::getReferencedC
     std::vector<std::shared_ptr<toyquery::logicalplan::LogicalExpression>> projection_exprs) {
   std::unordered_set<absl::string_view> accum;
   for (auto& projection_expr : projection_exprs) { CHECK_OK_OR_RETURN(getColumnFromExpr(projection_expr, accum)); }
+  return accum;
+}
+
+absl::StatusOr<std::unordered_set<absl::string_view>> SqlPlanner::getReferencedColumnsBySelection(
+    std::shared_ptr<SqlSelect> select,
+    std::shared_ptr<toyquery::dataframe::DataFrame> table) {
+  std::unordered_set<absl::string_view> accum;
+
+  if (select->selection_ != nullptr) {
+    ASSIGN_OR_RETURN(auto filter_expr, createLogicalExpression(select->selection_, table));
+    CHECK_OK_OR_RETURN(getColumnFromExpr(filter_expr, accum));
+    // TODO: check that all columns used in the selection expr are valid and return error if it isn't.
+  }
+
   return accum;
 }
 

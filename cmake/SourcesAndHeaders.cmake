@@ -9,6 +9,7 @@ set(sources
   src/physicalplan/accumulator.cc
   src/physicalplan/physicalexpression.cc
   src/physicalplan/physicalplan.cc
+  src/planner/planner.cc
   src/sql/expressions.cc
   src/sql/parser.cc
   src/sql/planner.cc
@@ -38,6 +39,7 @@ set(headers
     include/physicalplan/aggregationexpression.h
     include/physicalplan/physicalexpression.h
     include/physicalplan/physicalplan.h
+    include/planner/planner.h
     include/logicalplan/logicalexpression.h
     include/logicalplan/logicalplan.h
     include/logicalplan/utils.h
