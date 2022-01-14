@@ -37,6 +37,11 @@ class QueryPlanner {
   absl::StatusOr<std::shared_ptr<toyquery::physicalplan::PhysicalExpression>> CreatePhysicalExpression(
       std::shared_ptr<toyquery::logicalplan::LogicalExpression> logical_expr,
       std::shared_ptr<toyquery::logicalplan::LogicalPlan> input_plan);
+
+ private:
+  absl::StatusOr<std::shared_ptr<toyquery::physicalplan::AggregationExpression>> createAggregationExpression(
+      std::shared_ptr<toyquery::logicalplan::AggregateExpression> logical_aggregation_expr,
+      std::shared_ptr<toyquery::logicalplan::LogicalPlan> input_plan);
 };
 
 }  // namespace planner

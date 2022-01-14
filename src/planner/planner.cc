@@ -8,6 +8,7 @@ using ::toyquery::logicalplan::LogicalExpressionType;
 using ::toyquery::logicalplan::LogicalPlan;
 using ::toyquery::logicalplan::LogicalPlanType;
 using ::toyquery::physicalplan::AddExpression;
+using ::toyquery::physicalplan::AggregationExpression;
 using ::toyquery::physicalplan::AndExpression;
 using ::toyquery::physicalplan::Cast;
 using ::toyquery::physicalplan::Column;
@@ -15,6 +16,7 @@ using ::toyquery::physicalplan::DivideExpression;
 using ::toyquery::physicalplan::EqExpression;
 using ::toyquery::physicalplan::GreaterThanEqualsExpression;
 using ::toyquery::physicalplan::GreaterThanExpression;
+using ::toyquery::physicalplan::HashAggregation;
 using ::toyquery::physicalplan::LessThanEqualsExpression;
 using ::toyquery::physicalplan::LessThanExpression;
 using ::toyquery::physicalplan::LiteralDouble;
@@ -67,14 +69,26 @@ absl::StatusOr<std::shared_ptr<toyquery::physicalplan::PhysicalPlan>> QueryPlann
         group_exprs.push_back(physical_group_expr);
       }
 
-      // get aggregation expr
-      break;
+      std::vector<std::shared_ptr<AggregationExpression>> aggregation_exprs;
+      for (auto& logical_aggregation_expr : logical_aggregation->aggregation_expr_) {
+        ASSIGN_OR_RETURN(
+            auto physical_aggregation_expr,
+            createAggregationExpression(logical_aggregation_expr, logical_aggregation->input_));
+        aggregation_exprs.push_back(physical_aggregation_expr);
+      }
+
+      ASSIGN_OR_RETURN(auto schema, logical_aggregation->Schema());
+      return std::make_shared<HashAggregation>(input, schema, group_exprs, aggregation_exprs);
     }
     default: return absl::InvalidArgumentError("invalid type of logical plan");
   }
 
   return absl::InternalError("unreachable code");
 }
+
+absl::StatusOr<std::shared_ptr<AggregationExpression>> QueryPlanner::createAggregationExpression(
+    std::shared_ptr<toyquery::logicalplan::AggregateExpression> logical_aggregation_expr,
+    std::shared_ptr<toyquery::logicalplan::LogicalPlan> input_plan) { }
 
 absl::StatusOr<std::shared_ptr<toyquery::physicalplan::PhysicalExpression>> QueryPlanner::CreatePhysicalExpression(
     std::shared_ptr<LogicalExpression> logical_expr,
