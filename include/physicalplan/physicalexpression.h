@@ -45,7 +45,7 @@ class PhysicalExpression {
 };
 
 /**
- * @brief A reference to a column of a table by name.
+ * @brief A reference to a column of a table by index.
  */
 class Column : public PhysicalExpression {
  public:
@@ -118,7 +118,7 @@ class LiteralDouble : public PhysicalExpression {
  */
 class LiteralString : public PhysicalExpression {
  public:
-  LiteralString(std::string val) : val_{ val } { }
+  LiteralString(absl::string_view val) : val_{ val } { }
   ~LiteralString() override;
 
   /**
@@ -132,7 +132,7 @@ class LiteralString : public PhysicalExpression {
   std::string ToString() override;
 
  private:
-  std::string val_;
+  absl::string_view val_;
 };
 
 /**
@@ -141,8 +141,12 @@ class LiteralString : public PhysicalExpression {
  */
 class BooleanExpression : public PhysicalExpression {
  public:
-  BooleanExpression(std::shared_ptr<PhysicalExpression> left, std::shared_ptr<PhysicalExpression> right)
+  BooleanExpression(
+      std::shared_ptr<PhysicalExpression> left,
+      absl::string_view op,
+      std::shared_ptr<PhysicalExpression> right)
       : left_{ left },
+        op_{ op },
         right_{ right } { }
 
   /**
@@ -172,8 +176,14 @@ class BooleanExpression : public PhysicalExpression {
       const std::shared_ptr<arrow::Scalar> left,
       const std::shared_ptr<arrow::Scalar> right) = 0;
 
+  /**
+   * @copydoc PhysicalExpression::ToString()
+   */
+  std::string ToString() override;
+
  private:
   std::shared_ptr<PhysicalExpression> left_;
+  absl::string_view op_;
   std::shared_ptr<PhysicalExpression> right_;
 };
 
@@ -184,7 +194,7 @@ class BooleanExpression : public PhysicalExpression {
 class EqExpression : public BooleanExpression {
  public:
   EqExpression(std::shared_ptr<PhysicalExpression> left, std::shared_ptr<PhysicalExpression> right)
-      : BooleanExpression(left, right) { }
+      : BooleanExpression(left, "eq", right) { }
 
   /**
    * @copydoc BooleanExpression::EvaluateBooleanExpression
@@ -203,7 +213,7 @@ class EqExpression : public BooleanExpression {
 class NeqExpression : public BooleanExpression {
  public:
   NeqExpression(std::shared_ptr<PhysicalExpression> left, std::shared_ptr<PhysicalExpression> right)
-      : BooleanExpression(left, right) { }
+      : BooleanExpression(left, "neq", right) { }
 
   /**
    * @copydoc BooleanExpression::EvaluateBooleanExpression
@@ -222,7 +232,7 @@ class NeqExpression : public BooleanExpression {
 class AndExpression : public BooleanExpression {
  public:
   AndExpression(std::shared_ptr<PhysicalExpression> left, std::shared_ptr<PhysicalExpression> right)
-      : BooleanExpression(left, right) { }
+      : BooleanExpression(left, "and", right) { }
 
   /**
    * @copydoc BooleanExpression::EvaluateBooleanExpression
@@ -241,7 +251,7 @@ class AndExpression : public BooleanExpression {
 class OrExpression : public BooleanExpression {
  public:
   OrExpression(std::shared_ptr<PhysicalExpression> left, std::shared_ptr<PhysicalExpression> right)
-      : BooleanExpression(left, right) { }
+      : BooleanExpression(left, "or", right) { }
 
   /**
    * @copydoc BooleanExpression::EvaluateBooleanExpression
@@ -260,7 +270,7 @@ class OrExpression : public BooleanExpression {
 class LessThanExpression : public BooleanExpression {
  public:
   LessThanExpression(std::shared_ptr<PhysicalExpression> left, std::shared_ptr<PhysicalExpression> right)
-      : BooleanExpression(left, right) { }
+      : BooleanExpression(left, "lt", right) { }
 
   /**
    * @copydoc BooleanExpression::EvaluateBooleanExpression
@@ -279,7 +289,7 @@ class LessThanExpression : public BooleanExpression {
 class LessThanEqualsExpression : public BooleanExpression {
  public:
   LessThanEqualsExpression(std::shared_ptr<PhysicalExpression> left, std::shared_ptr<PhysicalExpression> right)
-      : BooleanExpression(left, right) { }
+      : BooleanExpression(left, "lteq", right) { }
 
   /**
    * @copydoc BooleanExpression::EvaluateBooleanExpression
@@ -298,7 +308,7 @@ class LessThanEqualsExpression : public BooleanExpression {
 class GreaterThanExpression : public BooleanExpression {
  public:
   GreaterThanExpression(std::shared_ptr<PhysicalExpression> left, std::shared_ptr<PhysicalExpression> right)
-      : BooleanExpression(left, right) { }
+      : BooleanExpression(left, "gt", right) { }
 
   /**
    * @copydoc BooleanExpression::EvaluateBooleanExpression
@@ -317,7 +327,7 @@ class GreaterThanExpression : public BooleanExpression {
 class GreaterThanEqualsExpression : public BooleanExpression {
  public:
   GreaterThanEqualsExpression(std::shared_ptr<PhysicalExpression> left, std::shared_ptr<PhysicalExpression> right)
-      : BooleanExpression(left, right) { }
+      : BooleanExpression(left, "gteq", right) { }
 
   /**
    * @copydoc BooleanExpression::EvaluateBooleanExpression
@@ -406,6 +416,11 @@ class AddExpression : public MathExpression {
       const std::shared_ptr<arrow::Scalar> left,
       const std::shared_ptr<arrow::Scalar> right) override;
 
+  /**
+   * @copydoc PhysicalExpression::ToString()
+   */
+  std::string ToString() override;
+
  private:
 };
 
@@ -424,6 +439,11 @@ class SubtractExpression : public MathExpression {
   absl::StatusOr<std::shared_ptr<arrow::Scalar>> EvaluateMathExpression(
       const std::shared_ptr<arrow::Scalar> left,
       const std::shared_ptr<arrow::Scalar> right) override;
+
+  /**
+   * @copydoc PhysicalExpression::ToString()
+   */
+  std::string ToString() override;
 
  private:
 };
@@ -444,6 +464,11 @@ class MultiplyExpression : public MathExpression {
       const std::shared_ptr<arrow::Scalar> left,
       const std::shared_ptr<arrow::Scalar> right) override;
 
+  /**
+   * @copydoc PhysicalExpression::ToString()
+   */
+  std::string ToString() override;
+
  private:
 };
 
@@ -463,7 +488,39 @@ class DivideExpression : public MathExpression {
       const std::shared_ptr<arrow::Scalar> left,
       const std::shared_ptr<arrow::Scalar> right) override;
 
+  /**
+   * @copydoc PhysicalExpression::ToString()
+   */
+  std::string ToString() override;
+
  private:
+};
+
+/**
+ * @brief The CAST expression
+ *
+ */
+class Cast : public PhysicalExpression {
+ public:
+  Cast(std::shared_ptr<PhysicalExpression> expr, std::shared_ptr<arrow::DataType> data_type)
+      : expr_{ expr },
+        data_type_{ data_type } { }
+
+  ~Cast() override;
+
+  /**
+   * @copydoc PhysicalExpression::Evaluate()
+   */
+  absl::StatusOr<std::shared_ptr<arrow::Array>> Evaluate(const std::shared_ptr<arrow::RecordBatch> input) override;
+
+  /**
+   * @copydoc PhysicalExpression::ToString()
+   */
+  std::string ToString() override;
+
+ private:
+  std::shared_ptr<PhysicalExpression> expr_;
+  std::shared_ptr<arrow::DataType> data_type_;
 };
 
 }  // namespace physicalplan

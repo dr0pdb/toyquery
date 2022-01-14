@@ -30,13 +30,13 @@ class QueryPlanner {
    * @brief Create a Physical Expression from the given Logical expression
    *
    * @param logical_expr: the given logical expression
-   * @param logical_plan: the input logical plan
+   * @param input_plan: the input logical plan
    * @return absl::StatusOr<std::shared_ptr<toyquery::physicalplan::PhysicalExpression>>: the generated physical expression
    * or error status
    */
   absl::StatusOr<std::shared_ptr<toyquery::physicalplan::PhysicalExpression>> CreatePhysicalExpression(
       std::shared_ptr<toyquery::logicalplan::LogicalExpression> logical_expr,
-      std::shared_ptr<toyquery::logicalplan::LogicalPlan> logical_plan);
+      std::shared_ptr<toyquery::logicalplan::LogicalPlan> input_plan);
 };
 
 }  // namespace planner

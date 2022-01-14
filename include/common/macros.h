@@ -67,6 +67,9 @@ namespace toyquery {
 #define ASSIGN_OR_RETURN(lhs, rexpr) \
   ASSIGN_OR_RETURN_IMPL_(STATUS_MACROS_IMPL_CONCAT_(status_or_value, __LINE__), lhs, rexpr)
 
+#define ASSIGN_OR_RETURN2(lhs, diff, rexpr) \
+  ASSIGN_OR_RETURN_IMPL_(STATUS_MACROS_IMPL_CONCAT_(STATUS_MACROS_IMPL_CONCAT_(status_or_value, __LINE__), diff), lhs, rexpr)
+
 // Internal helper.
 #define ASSIGN_OR_RETURN_IMPL_(statusor, lhs, rexpr)                               \
   auto statusor = (rexpr);                                                         \

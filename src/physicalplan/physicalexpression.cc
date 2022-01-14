@@ -45,7 +45,7 @@ std::string LiteralDouble::ToString() { return "todo"; }
 absl::StatusOr<std::shared_ptr<arrow::Array>> LiteralString::Evaluate(const std::shared_ptr<arrow::RecordBatch> input) {
   arrow::StringBuilder builder;
   builder.Reserve(input->num_rows());
-  for (int i = 0; i < input->num_rows(); i++) { builder.UnsafeAppend(val_); }
+  for (int i = 0; i < input->num_rows(); i++) { builder.UnsafeAppend(std::string(val_)); }
 
   auto array = builder.Finish();
   if (!array.ok()) { return absl::InternalError(array.status().detail()->ToString()); }
@@ -372,6 +372,10 @@ absl::StatusOr<std::shared_ptr<arrow::Scalar>> DivideExpression::EvaluateMathExp
 
 #undef DIVIDE_ARROW_SCALER
 }
+
+absl::StatusOr<std::shared_ptr<arrow::Array>> Cast::Evaluate(const std::shared_ptr<arrow::RecordBatch> input) { }
+
+std::string Cast::ToString() { return "todo"; }
 
 }  // namespace physicalplan
 }  // namespace toyquery
