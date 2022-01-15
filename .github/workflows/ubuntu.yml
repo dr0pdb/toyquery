@@ -32,6 +32,13 @@ jobs:
           cd ext
           git clone https://github.com/abseil/abseil-cpp --branch lts_2021_11_02
 
+      - name: setup glog
+        if: ${{ steps.cache.output.cache-hit != 'true' }}
+        run: |
+          mkdir ext
+          cd ext
+          git clone https://github.com/google/glog.git --branch v0.5.0
+
       - name: install GoogleTest
         if: ${{ steps.cache.output.cache-hit != 'true' }}
         run: |
@@ -71,6 +78,7 @@ jobs:
 
       - name: run tests
         run: |
+          cp test/data/test.csv /tmp/test.csv
           cd build
           ctest -C $BUILD_TYPE -VV
 
