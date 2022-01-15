@@ -16,7 +16,7 @@ namespace common {
  * @param status The absl::Status object
  * @return absl::string_view: status message
  */
-inline absl::string_view GetMessageFromStatus(absl::Status status);
+absl::string_view GetMessageFromStatus(absl::Status status);
 
 /**
  * @brief Get the Message From Status object
@@ -24,17 +24,9 @@ inline absl::string_view GetMessageFromStatus(absl::Status status);
  * @param status The arrow::Status object
  * @return absl::string_view: status message
  */
-inline absl::string_view GetMessageFromStatus(arrow::Status status);
+absl::string_view GetMessageFromStatus(arrow::Status status);
 
-/**
- * @brief Get the Message From Result object
- *
- * @tparam T : the type param of arrow::Result
- * @param result : the arrow::Result
- * @return absl::string_view : the status message
- */
-template<typename T>
-inline absl::string_view GetMessageFromResult(arrow::Result<T> result);
+#define GetMessageFromResult(result) result.status().detail()->ToString()
 
 /**
  * @brief Get the Message from the left or right result object depending on whichever is not ok.
@@ -46,7 +38,7 @@ inline absl::string_view GetMessageFromResult(arrow::Result<T> result);
  * @return absl::string_view : the status message
  */
 template<typename T>
-inline absl::string_view GetMessageFromResultLeftOrRight(arrow::Result<T> left, arrow::Result<T> right);
+absl::string_view GetMessageFromResultLeftOrRight(arrow::Result<T> left, arrow::Result<T> right);
 
 }  // namespace common
 }  // namespace toyquery

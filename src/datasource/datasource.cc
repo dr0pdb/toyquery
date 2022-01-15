@@ -1,13 +1,15 @@
 #include "datasource/datasource.h"
 
+#include <glog/logging.h>
+
+#include "absl/status/status.h"
+#include "absl/status/statusor.h"
 #include "arrow/csv/api.h"
 #include "arrow/io/api.h"
 #include "common/status.h"
 
 namespace toyquery {
 namespace datasource {
-
-using ::toyquery::common::GetMessageFromResult;
 
 absl::StatusOr<std::shared_ptr<arrow::Schema>> CsvDataSource::Schema() {
   if (schema_ != nullptr) { return schema_; }
@@ -23,6 +25,8 @@ absl::StatusOr<std::shared_ptr<arrow::TableBatchReader>> CsvDataSource::Scan(std
 }
 
 absl::StatusOr<std::shared_ptr<arrow::Table>> CsvDataSource::readFile(std::vector<std::string> projection) {
+  std::cout << "readFile start for filename_" << filename_ << std::endl;
+
   arrow::io::IOContext io_context = arrow::io::default_io_context();
   auto maybe_input = arrow::io::ReadableFile::Open(filename_);
   if (!maybe_input.ok()) { return absl::InternalError(GetMessageFromResult(maybe_input)); }
@@ -38,6 +42,8 @@ absl::StatusOr<std::shared_ptr<arrow::Table>> CsvDataSource::readFile(std::vecto
   auto maybe_reader = arrow::csv::TableReader::Make(io_context, *maybe_input, read_options, parse_options, convert_options);
   if (!maybe_reader.ok()) { return absl::InternalError(GetMessageFromResult(maybe_reader)); }
 
+  std::cout << "readFile: reading table from csv file..." << std::endl;
+
   // Read table from CSV file
   std::shared_ptr<arrow::csv::TableReader> reader = *maybe_reader;
   auto maybe_table = reader->Read();
@@ -46,6 +52,20 @@ absl::StatusOr<std::shared_ptr<arrow::Table>> CsvDataSource::readFile(std::vecto
 
   return table;
 }
+
+CsvDataSource::CsvDataSource(std::string filename, int batch_size) : CsvDataSource(filename, batch_size, nullptr) { }
+
+CsvDataSource::CsvDataSource(std::string filename, int batch_size, std::shared_ptr<arrow::Schema> schema)
+    : DataSource(),
+      filename_{ filename },
+      batch_size_{ batch_size },
+      schema_{ schema } { }
+
+CsvDataSource::~CsvDataSource() { }
+
+DataSource::DataSource() { }
+
+DataSource::~DataSource() { }
 
 }  // namespace datasource
 }  // namespace toyquery

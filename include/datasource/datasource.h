@@ -16,7 +16,7 @@ namespace datasource {
  */
 class DataSource {
  public:
-  DataSource() = default;
+  DataSource();
 
   virtual ~DataSource();
 
@@ -41,12 +41,8 @@ class DataSource {
 
 class CsvDataSource : public DataSource {
  public:
-  CsvDataSource(std::string filename, int batch_size) : CsvDataSource(filename, batch_size, nullptr) { }
-
-  CsvDataSource(std::string filename, int batch_size, std::shared_ptr<arrow::Schema> schema)
-      : filename_{ filename },
-        batch_size_{ batch_size },
-        schema_{ schema } { }
+  CsvDataSource(std::string filename, int batch_size);
+  CsvDataSource(std::string filename, int batch_size, std::shared_ptr<arrow::Schema> schema);
 
   ~CsvDataSource() override;
 

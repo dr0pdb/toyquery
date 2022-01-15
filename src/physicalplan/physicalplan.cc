@@ -9,7 +9,6 @@
 namespace toyquery {
 namespace physicalplan {
 
-using toyquery::common::GetMessageFromResult;
 using toyquery::common::GetMessageFromStatus;
 
 absl::StatusOr<std::shared_ptr<arrow::Schema>> Scan::Schema() {

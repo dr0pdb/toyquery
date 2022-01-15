@@ -5,7 +5,6 @@ namespace physicalplan {
 
 namespace {
 
-using ::toyquery::common::GetMessageFromResult;
 using ::toyquery::common::GetMessageFromResultLeftOrRight;
 using ::toyquery::common::GetMessageFromStatus;
 
