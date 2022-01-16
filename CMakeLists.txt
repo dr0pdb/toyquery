@@ -26,6 +26,7 @@ if (UNIX)
     add_compile_options("$<$<CONFIG:DEBUG>:-D_DEBUG>")    #this will allow to use same _DEBUG macro available in both Linux as well as Windows - MSCV environment. Easy to put Debug specific code.
 endif (UNIX)
 
+set(CMAKE_CXX_STANDARD 17)
 
 #
 # Setup alternative names
