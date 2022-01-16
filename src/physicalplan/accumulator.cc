@@ -34,6 +34,8 @@ absl::Status MaxAccumulator::Accumulate(std::shared_ptr<arrow::Scalar> value) {
   }
 
 #undef COMPUTE_MAX_ARROW_SCALER
+
+  return absl::OkStatus();
 }
 
 absl::StatusOr<std::shared_ptr<arrow::Scalar>> MaxAccumulator::FinalValue() { return value_; }
@@ -69,6 +71,8 @@ absl::Status MinAccumulator::Accumulate(std::shared_ptr<arrow::Scalar> value) {
   }
 
 #undef COMPUTE_MIN_ARROW_SCALER
+
+  return absl::OkStatus();
 }
 
 absl::StatusOr<std::shared_ptr<arrow::Scalar>> MinAccumulator::FinalValue() { return value_; }
@@ -104,6 +108,8 @@ absl::Status SumAccumulator::Accumulate(std::shared_ptr<arrow::Scalar> value) {
   }
 
 #undef COMPUTE_SUM_ARROW_SCALER
+
+  return absl::OkStatus();
 }
 
 absl::StatusOr<std::shared_ptr<arrow::Scalar>> SumAccumulator::FinalValue() { return value_; }

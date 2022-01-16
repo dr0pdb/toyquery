@@ -74,6 +74,12 @@ std::shared_ptr<arrow::Table> GetTestData() {
       GetTestSchema(), { *maybe_id_array, *maybe_name_array, *maybe_age_array, *maybe_frequency_array });
 }
 
+int GetMinAge() { return 1; }
+int GetMaxAge() { return 7; }
+int GetAgeSum() { return 28; }
+
+std::shared_ptr<arrow::ChunkedArray> GetAgeColumn() { return GetTestData()->column(2); }
+
 bool CompareArrowTable(std::shared_ptr<arrow::Table> expected_table, std::shared_ptr<arrow::Table> table) {
   if (expected_table->num_rows() != table->num_rows()) return false;
   if (expected_table->num_columns() != table->num_columns()) return false;
