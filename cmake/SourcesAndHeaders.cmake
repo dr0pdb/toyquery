@@ -48,6 +48,7 @@ set(headers
     include/sql/planner.h
     include/sql/tokenizer.h
     include/sql/tokens.h
+    include/test_utils/test_utils.h
     include/toyquery.h
 )
 

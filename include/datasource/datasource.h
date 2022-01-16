@@ -58,9 +58,15 @@ class CsvDataSource : public DataSource {
    */
   absl::StatusOr<std::shared_ptr<arrow::TableBatchReader>> Scan(std::vector<std::string> projection) override;
 
- private:
-  absl::StatusOr<std::shared_ptr<arrow::Table>> readFile(std::vector<std::string> projection);
+  /**
+   * @brief Read a file into an arrow::Table
+   *
+   * @param projection: the projection to apply on the csv file.
+   * @return absl::StatusOr<std::shared_ptr<arrow::Table>>: the arrow table
+   */
+  absl::StatusOr<std::shared_ptr<arrow::Table>> ReadFile(std::vector<std::string> projection);
 
+ private:
   std::string filename_;
   int batch_size_;
   std::shared_ptr<arrow::Schema> schema_;

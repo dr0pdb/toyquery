@@ -18,7 +18,7 @@ struct Key {
   bool operator==(const Key& other) const {
     if (scalars_.size() != other.scalars_.size()) return false;
 
-    for (int idx = 0; idx < scalars_.size(); idx++) {
+    for (size_t idx = 0; idx < scalars_.size(); idx++) {
       if (!scalars_[idx]->Equals(other.scalars_[idx])) { return false; }
     }
 

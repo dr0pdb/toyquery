@@ -1,3 +1,8 @@
-name,age
-random1,44
-random2, 14
+id,name,age,frequency
+1,random1,1,1.1
+2,random2,2,2.2
+3,random3,3,3.3
+4,random4,4,4.4
+5,random5,5,5.5
+6,random6,6,6.6
+7,random7,7,7.7

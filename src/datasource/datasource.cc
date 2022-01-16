@@ -14,17 +14,17 @@ namespace datasource {
 absl::StatusOr<std::shared_ptr<arrow::Schema>> CsvDataSource::Schema() {
   if (schema_ != nullptr) { return schema_; }
 
-  ASSIGN_OR_RETURN(auto table, readFile({}));
+  ASSIGN_OR_RETURN(auto table, ReadFile({}));
   schema_ = table->schema();
   return schema_;
 }
 
 absl::StatusOr<std::shared_ptr<arrow::TableBatchReader>> CsvDataSource::Scan(std::vector<std::string> projection) {
-  ASSIGN_OR_RETURN(auto table, readFile(projection));
+  ASSIGN_OR_RETURN(auto table, ReadFile(projection));
   return std::make_shared<arrow::TableBatchReader>(table.operator*());
 }
 
-absl::StatusOr<std::shared_ptr<arrow::Table>> CsvDataSource::readFile(std::vector<std::string> projection) {
+absl::StatusOr<std::shared_ptr<arrow::Table>> CsvDataSource::ReadFile(std::vector<std::string> projection) {
   std::cout << "readFile start for filename_" << filename_ << std::endl;
 
   arrow::io::IOContext io_context = arrow::io::default_io_context();

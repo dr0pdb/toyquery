@@ -6,9 +6,14 @@
 #include <memory>
 
 #include "absl/strings/string_view.h"
+#include "test_utils/test_utils.h"
 
 namespace toyquery {
 namespace datasource {
+
+using ::toyquery::testutils::CompareArrowTableAndPrintDebugInfo;
+using ::toyquery::testutils::GetTestData;
+using ::toyquery::testutils::GetTestSchema;
 
 class CsvDataSourceTest : public ::testing::Test {
  protected:
@@ -17,10 +22,22 @@ class CsvDataSourceTest : public ::testing::Test {
   std::unique_ptr<CsvDataSource> csv_data_source_;
 };
 
-TEST_F(CsvDataSourceTest, ReadsDataCorrectlyWithCorrectSchema) {
+TEST_F(CsvDataSourceTest, ReadsDataWithCorrectSchema) {
+  auto expected_schema = GetTestSchema();
+
   auto schema_or = csv_data_source_->Schema();
+
   EXPECT_TRUE(schema_or.ok());
-  std::cout << (*schema_or)->ToString() << std::endl;
+  EXPECT_TRUE(expected_schema->Equals(*schema_or));
+}
+
+TEST_F(CsvDataSourceTest, ReadsDataWithCorrectBatches) {
+  auto expected_table = GetTestData();
+
+  auto table_or = csv_data_source_->ReadFile({});
+
+  EXPECT_TRUE(table_or.ok());
+  EXPECT_TRUE(CompareArrowTableAndPrintDebugInfo(expected_table, *table_or));
 }
 
 }  // namespace datasource
