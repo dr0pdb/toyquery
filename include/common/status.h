@@ -28,17 +28,8 @@ absl::string_view GetMessageFromStatus(arrow::Status status);
 
 #define GetMessageFromResult(result) result.status().detail()->ToString()
 
-/**
- * @brief Get the Message from the left or right result object depending on whichever is not ok.
- *
- * @note Assumes that one of the operands is not ok.
- * @tparam T : the type param of arrow::Result
- * @param left : the left param arrow::Result
- * @param right: the right param arrow::Result
- * @return absl::string_view : the status message
- */
-template<typename T>
-absl::string_view GetMessageFromResultLeftOrRight(arrow::Result<T> left, arrow::Result<T> right);
+#define GetMessageFromResultLeftOrRight(left, right) \
+  ((!left.ok()) ? GetMessageFromResult(left) : GetMessageFromResult(right))
 
 }  // namespace common
 }  // namespace toyquery

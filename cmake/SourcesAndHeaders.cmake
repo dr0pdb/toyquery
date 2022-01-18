@@ -55,5 +55,6 @@ set(headers
 set(test_sources
   src/datasource/datasource_test.cc
   src/physicalplan/accumulator_test.cc
+  src/physicalplan/physicalexpression_test.cc
   src/toyquery_test.cc
 )

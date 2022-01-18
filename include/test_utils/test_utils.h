@@ -12,6 +12,8 @@
 namespace toyquery {
 namespace testutils {
 
+static constexpr int AGE_COLUMN = 2;
+
 std::shared_ptr<arrow::Schema> GetTestSchema() {
   std::vector<std::shared_ptr<arrow::Field>> expected_fields = { std::make_shared<arrow::Field>("id", arrow::int64()),
                                                                  std::make_shared<arrow::Field>("name", arrow::utf8()),
@@ -78,7 +80,7 @@ int GetMinAge() { return 1; }
 int GetMaxAge() { return 7; }
 int GetAgeSum() { return 28; }
 
-std::shared_ptr<arrow::ChunkedArray> GetAgeColumn() { return GetTestData()->column(2); }
+std::shared_ptr<arrow::ChunkedArray> GetAgeColumn() { return GetTestData()->column(AGE_COLUMN); }
 
 bool CompareArrowTable(std::shared_ptr<arrow::Table> expected_table, std::shared_ptr<arrow::Table> table) {
   if (expected_table->num_rows() != table->num_rows()) return false;
@@ -101,6 +103,25 @@ bool CompareArrowTableAndPrintDebugInfo(std::shared_ptr<arrow::Table> expected_t
     std::cout << "Actual table\n" << table->ToString() << std::endl;
   }
   return result;
+}
+
+std::shared_ptr<arrow::RecordBatch> GetDummyRecordBatch() {
+  return std::make_shared<arrow::TableBatchReader>(GetTestData().operator*())->Next().ValueOrDie();
+}
+
+bool CompareArrowArrayWithChunkArray(std::shared_ptr<arrow::Array> arr, std::shared_ptr<arrow::ChunkedArray> chunk_arr) {
+  if (arr->length() != chunk_arr->length()) return false;
+  int rows = arr->length();
+
+  for (int row = 0; row < rows; row++) {
+    if (!arr->GetScalar(row).ValueOrDie()->Equals(chunk_arr->GetScalar(row).ValueOrDie())) {
+      std::cout << "Found diff at idx: " << row << ", arr[idx]: " << arr->GetScalar(row).ValueOrDie()->ToString()
+                << " chunk_arr[idx]: " << chunk_arr->GetScalar(row).ValueOrDie()->ToString() << std::endl;
+      return false;
+    }
+  }
+
+  return true;
 }
 
 }  // namespace testutils

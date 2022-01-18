@@ -5,10 +5,15 @@ namespace physicalplan {
 
 namespace {
 
-using ::toyquery::common::GetMessageFromResultLeftOrRight;
 using ::toyquery::common::GetMessageFromStatus;
 
 }  // namespace
+
+PhysicalExpression::~PhysicalExpression() { }
+
+Column::Column(int idx) : idx_{ idx } { }
+
+Column::~Column() { }
 
 absl::StatusOr<std::shared_ptr<arrow::Array>> Column::Evaluate(const std::shared_ptr<arrow::RecordBatch> input) {
   if (idx_ < 0 || idx_ >= input->num_columns()) { return absl::OutOfRangeError("index out of range"); }
@@ -16,6 +21,10 @@ absl::StatusOr<std::shared_ptr<arrow::Array>> Column::Evaluate(const std::shared
 }
 
 std::string Column::ToString() { return "todo"; }
+
+LiteralLong::LiteralLong(long val) : val_{ val } { }
+
+LiteralLong::~LiteralLong() { }
 
 absl::StatusOr<std::shared_ptr<arrow::Array>> LiteralLong::Evaluate(const std::shared_ptr<arrow::RecordBatch> input) {
   arrow::Int64Builder builder;
@@ -29,6 +38,10 @@ absl::StatusOr<std::shared_ptr<arrow::Array>> LiteralLong::Evaluate(const std::s
 
 std::string LiteralLong::ToString() { return "todo"; }
 
+LiteralDouble::LiteralDouble(double val) : val_{ val } { }
+
+LiteralDouble::~LiteralDouble() { }
+
 absl::StatusOr<std::shared_ptr<arrow::Array>> LiteralDouble::Evaluate(const std::shared_ptr<arrow::RecordBatch> input) {
   arrow::DoubleBuilder builder;
   builder.Reserve(input->num_rows());
@@ -41,6 +54,10 @@ absl::StatusOr<std::shared_ptr<arrow::Array>> LiteralDouble::Evaluate(const std:
 
 std::string LiteralDouble::ToString() { return "todo"; }
 
+LiteralString::LiteralString(absl::string_view val) : val_{ val } { }
+
+LiteralString::~LiteralString() { }
+
 absl::StatusOr<std::shared_ptr<arrow::Array>> LiteralString::Evaluate(const std::shared_ptr<arrow::RecordBatch> input) {
   arrow::StringBuilder builder;
   builder.Reserve(input->num_rows());
@@ -52,6 +69,16 @@ absl::StatusOr<std::shared_ptr<arrow::Array>> LiteralString::Evaluate(const std:
 }
 
 std::string LiteralString::ToString() { return "todo"; }
+
+BooleanExpression::BooleanExpression(
+    std::shared_ptr<PhysicalExpression> left,
+    absl::string_view op,
+    std::shared_ptr<PhysicalExpression> right)
+    : left_{ left },
+      op_{ op },
+      right_{ right } { }
+
+BooleanExpression::~BooleanExpression() { }
 
 absl::StatusOr<std::shared_ptr<arrow::Array>> BooleanExpression::Evaluate(const std::shared_ptr<arrow::RecordBatch> input) {
   ASSIGN_OR_RETURN(auto ll, left_->Evaluate(input));
@@ -91,17 +118,28 @@ absl::StatusOr<std::shared_ptr<arrow::Array>> BooleanExpression::Compare(
   return *array;
 }
 
+std::string BooleanExpression::ToString() { return "todo"; }
+
+EqExpression::EqExpression(std::shared_ptr<PhysicalExpression> left, std::shared_ptr<PhysicalExpression> right)
+    : BooleanExpression(left, "eq", right) { }
+
 absl::StatusOr<bool> EqExpression::EvaluateBooleanExpression(
     const std::shared_ptr<arrow::Scalar> left,
     const std::shared_ptr<arrow::Scalar> right) {
   return left->Equals(right);
 }
 
+NeqExpression::NeqExpression(std::shared_ptr<PhysicalExpression> left, std::shared_ptr<PhysicalExpression> right)
+    : BooleanExpression(left, "neq", right) { }
+
 absl::StatusOr<bool> NeqExpression::EvaluateBooleanExpression(
     const std::shared_ptr<arrow::Scalar> left,
     const std::shared_ptr<arrow::Scalar> right) {
   return !left->Equals(right);
 }
+
+AndExpression::AndExpression(std::shared_ptr<PhysicalExpression> left, std::shared_ptr<PhysicalExpression> right)
+    : BooleanExpression(left, "and", right) { }
 
 absl::StatusOr<bool> AndExpression::EvaluateBooleanExpression(
     const std::shared_ptr<arrow::Scalar> left,
@@ -111,6 +149,9 @@ absl::StatusOr<bool> AndExpression::EvaluateBooleanExpression(
   return lv && rv;
 }
 
+OrExpression::OrExpression(std::shared_ptr<PhysicalExpression> left, std::shared_ptr<PhysicalExpression> right)
+    : BooleanExpression(left, "or", right) { }
+
 absl::StatusOr<bool> OrExpression::EvaluateBooleanExpression(
     const std::shared_ptr<arrow::Scalar> left,
     const std::shared_ptr<arrow::Scalar> right) {
@@ -118,6 +159,9 @@ absl::StatusOr<bool> OrExpression::EvaluateBooleanExpression(
   CAST_ARROW_SCALER_TO_TYPE_OR_RETURN(auto rv, arrow::BooleanScalar, right);
   return lv || rv;
 }
+
+LessThanExpression::LessThanExpression(std::shared_ptr<PhysicalExpression> left, std::shared_ptr<PhysicalExpression> right)
+    : BooleanExpression(left, "lt", right) { }
 
 absl::StatusOr<bool> LessThanExpression::EvaluateBooleanExpression(
     const std::shared_ptr<arrow::Scalar> left,
@@ -147,6 +191,11 @@ absl::StatusOr<bool> LessThanExpression::EvaluateBooleanExpression(
 #undef COMPARE_LESS_THAN_ARROW_SCALER
 }
 
+LessThanEqualsExpression::LessThanEqualsExpression(
+    std::shared_ptr<PhysicalExpression> left,
+    std::shared_ptr<PhysicalExpression> right)
+    : BooleanExpression(left, "lteq", right) { }
+
 absl::StatusOr<bool> LessThanEqualsExpression::EvaluateBooleanExpression(
     const std::shared_ptr<arrow::Scalar> left,
     const std::shared_ptr<arrow::Scalar> right) {
@@ -174,6 +223,11 @@ absl::StatusOr<bool> LessThanEqualsExpression::EvaluateBooleanExpression(
 
 #undef COMPARE_LESS_THAN_EQUALS_ARROW_SCALER
 }
+
+GreaterThanExpression::GreaterThanExpression(
+    std::shared_ptr<PhysicalExpression> left,
+    std::shared_ptr<PhysicalExpression> right)
+    : BooleanExpression(left, "gt", right) { }
 
 absl::StatusOr<bool> GreaterThanExpression::EvaluateBooleanExpression(
     const std::shared_ptr<arrow::Scalar> left,
@@ -203,6 +257,11 @@ absl::StatusOr<bool> GreaterThanExpression::EvaluateBooleanExpression(
 #undef COMPARE_GREATER_THAN_ARROW_SCALER
 }
 
+GreaterThanEqualsExpression::GreaterThanEqualsExpression(
+    std::shared_ptr<PhysicalExpression> left,
+    std::shared_ptr<PhysicalExpression> right)
+    : BooleanExpression(left, "gteq", right) { }
+
 absl::StatusOr<bool> GreaterThanEqualsExpression::EvaluateBooleanExpression(
     const std::shared_ptr<arrow::Scalar> left,
     const std::shared_ptr<arrow::Scalar> right) {
@@ -231,6 +290,10 @@ absl::StatusOr<bool> GreaterThanEqualsExpression::EvaluateBooleanExpression(
 #undef COMPARE_GREATER_THAN_EQUALS_ARROW_SCALER
 }
 
+BinaryExpression::BinaryExpression(std::shared_ptr<PhysicalExpression> left, std::shared_ptr<PhysicalExpression> right)
+    : left_{ left },
+      right_{ right } { }
+
 absl::StatusOr<std::shared_ptr<arrow::Array>> BinaryExpression::Evaluate(const std::shared_ptr<arrow::RecordBatch> input) {
   ASSIGN_OR_RETURN(auto ll, left_->Evaluate(input));
   ASSIGN_OR_RETURN(auto rr, right_->Evaluate(input));
@@ -244,6 +307,9 @@ absl::StatusOr<std::shared_ptr<arrow::Array>> BinaryExpression::Evaluate(const s
 
   return EvaluateBinaryExpression(ll, rr);
 }
+
+MathExpression::MathExpression(std::shared_ptr<PhysicalExpression> left, std::shared_ptr<PhysicalExpression> right)
+    : BinaryExpression(left, right) { }
 
 absl::StatusOr<std::shared_ptr<arrow::Array>> MathExpression::EvaluateBinaryExpression(
     const std::shared_ptr<arrow::Array> left,
@@ -280,6 +346,11 @@ absl::StatusOr<std::shared_ptr<arrow::Array>> MathExpression::EvaluateBinaryExpr
 #undef EVALUATE_BINARY_EXPRESSION
 }
 
+AddExpression::AddExpression(std::shared_ptr<PhysicalExpression> left, std::shared_ptr<PhysicalExpression> right)
+    : MathExpression(left, right) { }
+
+AddExpression::~AddExpression() { }
+
 absl::StatusOr<std::shared_ptr<arrow::Scalar>> AddExpression::EvaluateMathExpression(
     const std::shared_ptr<arrow::Scalar> left,
     const std::shared_ptr<arrow::Scalar> right) {
@@ -302,6 +373,13 @@ absl::StatusOr<std::shared_ptr<arrow::Scalar>> AddExpression::EvaluateMathExpres
 
 #undef ADD_ARROW_SCALER
 }
+
+std::string AddExpression::ToString() { return "todo"; }
+
+SubtractExpression::SubtractExpression(std::shared_ptr<PhysicalExpression> left, std::shared_ptr<PhysicalExpression> right)
+    : MathExpression(left, right) { }
+
+SubtractExpression::~SubtractExpression() { }
 
 absl::StatusOr<std::shared_ptr<arrow::Scalar>> SubtractExpression::EvaluateMathExpression(
     const std::shared_ptr<arrow::Scalar> left,
@@ -326,6 +404,13 @@ absl::StatusOr<std::shared_ptr<arrow::Scalar>> SubtractExpression::EvaluateMathE
 #undef SUBTRACT_ARROW_SCALER
 }
 
+std::string SubtractExpression::ToString() { return "todo"; }
+
+MultiplyExpression::MultiplyExpression(std::shared_ptr<PhysicalExpression> left, std::shared_ptr<PhysicalExpression> right)
+    : MathExpression(left, right) { }
+
+MultiplyExpression::~MultiplyExpression() { }
+
 absl::StatusOr<std::shared_ptr<arrow::Scalar>> MultiplyExpression::EvaluateMathExpression(
     const std::shared_ptr<arrow::Scalar> left,
     const std::shared_ptr<arrow::Scalar> right) {
@@ -349,6 +434,13 @@ absl::StatusOr<std::shared_ptr<arrow::Scalar>> MultiplyExpression::EvaluateMathE
 #undef MULTIPLY_ARROW_SCALER
 }
 
+std::string MultiplyExpression::ToString() { return "todo"; }
+
+DivideExpression::DivideExpression(std::shared_ptr<PhysicalExpression> left, std::shared_ptr<PhysicalExpression> right)
+    : MathExpression(left, right) { }
+
+DivideExpression::~DivideExpression() { }
+
 absl::StatusOr<std::shared_ptr<arrow::Scalar>> DivideExpression::EvaluateMathExpression(
     const std::shared_ptr<arrow::Scalar> left,
     const std::shared_ptr<arrow::Scalar> right) {
@@ -371,6 +463,14 @@ absl::StatusOr<std::shared_ptr<arrow::Scalar>> DivideExpression::EvaluateMathExp
 
 #undef DIVIDE_ARROW_SCALER
 }
+
+std::string DivideExpression::ToString() { return "todo"; }
+
+Cast::Cast(std::shared_ptr<PhysicalExpression> expr, std::shared_ptr<arrow::DataType> data_type)
+    : expr_{ expr },
+      data_type_{ data_type } { }
+
+Cast::~Cast() { }
 
 absl::StatusOr<std::shared_ptr<arrow::Array>> Cast::Evaluate(const std::shared_ptr<arrow::RecordBatch> input) { }
 
