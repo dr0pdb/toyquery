@@ -33,6 +33,45 @@ TEST(ColumnTest, WorksCorrectly) {
   EXPECT_TRUE(CompareArrowArrayWithChunkArray(*age_column_or, expected_age_column));
 }
 
+TEST(LiteralLongTest, WorksCorrectly) {
+  auto record_batch = GetDummyRecordBatch();
+  auto literal_long_expr = std::make_shared<LiteralLong>(119382);
+
+  auto literal_column_or = literal_long_expr->Evaluate(record_batch);
+
+  EXPECT_TRUE(literal_column_or.ok());
+  EXPECT_EQ((*literal_column_or)->length(), record_batch->num_rows());
+  for (int idx = 0; idx < record_batch->num_rows(); idx++) {
+    EXPECT_TRUE((*literal_column_or)->GetScalar(idx).ValueOrDie()->Equals(std::make_shared<arrow::Int64Scalar>(119382)));
+  }
+}
+
+TEST(LiteralDoubleTest, WorksCorrectly) {
+  auto record_batch = GetDummyRecordBatch();
+  auto literal_double_expr = std::make_shared<LiteralDouble>(119.382);
+
+  auto literal_column_or = literal_double_expr->Evaluate(record_batch);
+
+  EXPECT_TRUE(literal_column_or.ok());
+  EXPECT_EQ((*literal_column_or)->length(), record_batch->num_rows());
+  for (int idx = 0; idx < record_batch->num_rows(); idx++) {
+    EXPECT_TRUE((*literal_column_or)->GetScalar(idx).ValueOrDie()->Equals(std::make_shared<arrow::DoubleScalar>(119.382)));
+  }
+}
+
+TEST(LiteralStringTest, WorksCorrectly) {
+  auto record_batch = GetDummyRecordBatch();
+  auto literal_string_expr = std::make_shared<LiteralString>("test");
+
+  auto literal_column_or = literal_string_expr->Evaluate(record_batch);
+
+  EXPECT_TRUE(literal_column_or.ok());
+  EXPECT_EQ((*literal_column_or)->length(), record_batch->num_rows());
+  for (int idx = 0; idx < record_batch->num_rows(); idx++) {
+    EXPECT_TRUE((*literal_column_or)->GetScalar(idx).ValueOrDie()->Equals(std::make_shared<arrow::StringScalar>("test")));
+  }
+}
+
 }  // namespace physicalplan
 }  // namespace toyquery
 
