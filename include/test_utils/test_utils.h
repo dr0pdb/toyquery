@@ -93,8 +93,8 @@ std::shared_ptr<toyquery::physicalplan::PhysicalExpression> GetNameColumnExpress
 std::shared_ptr<arrow::ChunkedArray> GetNameColumn() { return GetTestData()->column(NAME_COLUMN); }
 
 int GetMinAge() { return 1; }
-int GetMaxAge() { return 7; }
-int GetAgeSum() { return 28; }
+int GetMaxAge() { return 77; }
+int GetAgeSum() { return 248; }
 
 std::shared_ptr<toyquery::physicalplan::PhysicalExpression> GetAgeColumnExpression() {
   return std::make_shared<toyquery::physicalplan::Column>(AGE_COLUMN);
