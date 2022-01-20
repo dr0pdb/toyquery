@@ -12,7 +12,10 @@
 namespace toyquery {
 namespace testutils {
 
+static constexpr int ID_COLUMN = 0;
+static constexpr int NAME_COLUMN = 1;
 static constexpr int AGE_COLUMN = 2;
+static constexpr int FREQUENCY_COLUMN = 3;
 
 std::shared_ptr<arrow::Schema> GetTestSchema() {
   std::vector<std::shared_ptr<arrow::Field>> expected_fields = { std::make_shared<arrow::Field>("id", arrow::int64()),
@@ -53,10 +56,10 @@ std::shared_ptr<arrow::Table> GetTestData() {
   age_builder.Append(1);
   age_builder.Append(2);
   age_builder.Append(3);
-  age_builder.Append(4);
-  age_builder.Append(5);
-  age_builder.Append(6);
-  age_builder.Append(7);
+  age_builder.Append(44);
+  age_builder.Append(55);
+  age_builder.Append(66);
+  age_builder.Append(77);
   auto maybe_age_array = age_builder.Finish();
   if (!maybe_age_array.ok()) { return nullptr; }
 
@@ -76,11 +79,33 @@ std::shared_ptr<arrow::Table> GetTestData() {
       GetTestSchema(), { *maybe_id_array, *maybe_name_array, *maybe_age_array, *maybe_frequency_array });
 }
 
+std::shared_ptr<toyquery::physicalplan::PhysicalExpression> GetIdColumnExpression() {
+  return std::make_shared<toyquery::physicalplan::Column>(ID_COLUMN);
+}
+
+std::shared_ptr<arrow::ChunkedArray> GetIdColumn() { return GetTestData()->column(ID_COLUMN); }
+
+std::shared_ptr<toyquery::physicalplan::PhysicalExpression> GetNameColumnExpression() {
+  return std::make_shared<toyquery::physicalplan::Column>(NAME_COLUMN);
+}
+
+std::shared_ptr<arrow::ChunkedArray> GetNameColumn() { return GetTestData()->column(NAME_COLUMN); }
+
 int GetMinAge() { return 1; }
 int GetMaxAge() { return 7; }
 int GetAgeSum() { return 28; }
 
+std::shared_ptr<toyquery::physicalplan::PhysicalExpression> GetAgeColumnExpression() {
+  return std::make_shared<toyquery::physicalplan::Column>(AGE_COLUMN);
+}
+
 std::shared_ptr<arrow::ChunkedArray> GetAgeColumn() { return GetTestData()->column(AGE_COLUMN); }
+
+std::shared_ptr<toyquery::physicalplan::PhysicalExpression> GetFrequencyColumnExpression() {
+  return std::make_shared<toyquery::physicalplan::Column>(FREQUENCY_COLUMN);
+}
+
+std::shared_ptr<arrow::ChunkedArray> GetFrequencyColumn() { return GetTestData()->column(FREQUENCY_COLUMN); }
 
 bool CompareArrowTable(std::shared_ptr<arrow::Table> expected_table, std::shared_ptr<arrow::Table> table) {
   if (expected_table->num_rows() != table->num_rows()) return false;
@@ -122,6 +147,20 @@ bool CompareArrowArrayWithChunkArray(std::shared_ptr<arrow::Array> arr, std::sha
   }
 
   return true;
+}
+
+std::shared_ptr<arrow::Array> CompareIdAndAgeColumn(bool eq_expected) {
+  arrow::BooleanBuilder builder;
+  builder.Append(eq_expected);
+  builder.Append(eq_expected);
+  builder.Append(eq_expected);
+  builder.Append(!eq_expected);
+  builder.Append(!eq_expected);
+  builder.Append(!eq_expected);
+  builder.Append(!eq_expected);
+  auto maybe_id_array = builder.Finish();
+  if (!maybe_id_array.ok()) { return nullptr; }
+  return *maybe_id_array;
 }
 
 }  // namespace testutils

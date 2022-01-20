@@ -2,7 +2,7 @@ id,name,age,frequency
 1,random1,1,1.1
 2,random2,2,2.2
 3,random3,3,3.3
-4,random4,4,4.4
-5,random5,5,5.5
-6,random6,6,6.6
-7,random7,7,7.7
+4,random4,44,4.4
+5,random5,55,5.5
+6,random6,66,6.6
+7,random7,77,7.7
