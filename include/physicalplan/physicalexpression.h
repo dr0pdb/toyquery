@@ -137,6 +137,29 @@ class LiteralString : public PhysicalExpression {
 };
 
 /**
+ * @brief An expression which always evaluates to a literal boolean (BOOL) value.
+ *
+ */
+class LiteralBoolean : public PhysicalExpression {
+ public:
+  LiteralBoolean(bool val);
+  ~LiteralBoolean() override;
+
+  /**
+   * @copydoc PhysicalExpression::Evaluate()
+   */
+  absl::StatusOr<std::shared_ptr<arrow::Array>> Evaluate(const std::shared_ptr<arrow::RecordBatch> input) override;
+
+  /**
+   * @copydoc PhysicalExpression::ToString()
+   */
+  std::string ToString() override;
+
+ private:
+  bool val_;
+};
+
+/**
  * @brief A common class for boolean expressions.
  *
  */

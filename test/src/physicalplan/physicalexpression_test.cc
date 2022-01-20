@@ -74,6 +74,19 @@ TEST(LiteralStringTest, WorksCorrectly) {
   }
 }
 
+TEST(LiteralBooleanTest, WorksCorrectly) {
+  auto record_batch = GetDummyRecordBatch();
+  auto literal_string_expr = std::make_shared<LiteralBoolean>(true);
+
+  auto literal_column_or = literal_string_expr->Evaluate(record_batch);
+
+  EXPECT_TRUE(literal_column_or.ok());
+  EXPECT_EQ((*literal_column_or)->length(), record_batch->num_rows());
+  for (int idx = 0; idx < record_batch->num_rows(); idx++) {
+    EXPECT_TRUE((*literal_column_or)->GetScalar(idx).ValueOrDie()->Equals(std::make_shared<arrow::BooleanScalar>(true)));
+  }
+}
+
 template<typename T>
 void compare_all_rows(
     std::shared_ptr<PhysicalExpression> left,
@@ -176,6 +189,68 @@ TEST(NeqExpressionTest, WorksCorrectly) {
   auto result_or_1 = eq_expr_1->Evaluate(record_batch);
   EXPECT_FALSE(result_or_1.ok());
   EXPECT_EQ(result_or_1.status().message(), "Boolean expression operands do not have the same type");
+}
+
+TEST(AndExpressionTest, WorksCorrectly) {
+  auto record_batch = GetDummyRecordBatch();
+
+  compare_all_rows<AndExpression>(
+      std::make_shared<LiteralBoolean>(true), std::make_shared<LiteralBoolean>(true), record_batch, true);
+  compare_all_rows<AndExpression>(
+      std::make_shared<LiteralBoolean>(true), std::make_shared<LiteralBoolean>(false), record_batch, false);
+  compare_all_rows<AndExpression>(
+      std::make_shared<LiteralBoolean>(false), std::make_shared<LiteralBoolean>(true), record_batch, false);
+  compare_all_rows<AndExpression>(
+      std::make_shared<LiteralBoolean>(false), std::make_shared<LiteralBoolean>(false), record_batch, false);
+}
+
+TEST(OrExpressionTest, WorksCorrectly) {
+  auto record_batch = GetDummyRecordBatch();
+
+  compare_all_rows<OrExpression>(
+      std::make_shared<LiteralBoolean>(true), std::make_shared<LiteralBoolean>(true), record_batch, true);
+  compare_all_rows<OrExpression>(
+      std::make_shared<LiteralBoolean>(true), std::make_shared<LiteralBoolean>(false), record_batch, true);
+  compare_all_rows<OrExpression>(
+      std::make_shared<LiteralBoolean>(false), std::make_shared<LiteralBoolean>(true), record_batch, true);
+  compare_all_rows<OrExpression>(
+      std::make_shared<LiteralBoolean>(false), std::make_shared<LiteralBoolean>(false), record_batch, false);
+}
+
+TEST(LessThanExpressionTest, WorksCorrectly) {
+  auto record_batch = GetDummyRecordBatch();
+
+  // ints
+  compare_all_rows<LessThanExpression>(
+      std::make_shared<LiteralLong>(101), std::make_shared<LiteralLong>(111), record_batch, /*expected_result=*/true);
+  compare_all_rows<LessThanExpression>(
+      std::make_shared<LiteralLong>(101), std::make_shared<LiteralLong>(90), record_batch, /*expected_result=*/false);
+  compare_all_rows<LessThanExpression>(
+      std::make_shared<LiteralLong>(101), std::make_shared<LiteralLong>(101), record_batch, /*expected_result=*/false);
+
+  // strings
+  // compare_all_rows<LessThanExpression>(
+  //     std::make_shared<LiteralString>("hello"),
+  //     std::make_shared<LiteralString>("hello2"),
+  //     record_batch,
+  //     /*expected_result=*/true);
+  // compare_all_rows<LessThanExpression>(
+  //     std::make_shared<LiteralString>("hello"),
+  //     std::make_shared<LiteralString>("hello"),
+  //     record_batch,
+  //     /*expected_result=*/false);
+
+  // double
+  compare_all_rows<LessThanExpression>(
+      std::make_shared<LiteralDouble>(1.11),
+      std::make_shared<LiteralDouble>(1.12),
+      record_batch,
+      /*expected_result=*/true);
+  compare_all_rows<LessThanExpression>(
+      std::make_shared<LiteralDouble>(1.11),
+      std::make_shared<LiteralDouble>(1.11),
+      record_batch,
+      /*expected_result=*/false);
 }
 
 }  // namespace physicalplan

@@ -69,6 +69,21 @@ absl::StatusOr<std::shared_ptr<arrow::Array>> LiteralString::Evaluate(const std:
 
 std::string LiteralString::ToString() { return "todo"; }
 
+LiteralBoolean::LiteralBoolean(bool val) : val_{ val } { }
+
+LiteralBoolean::~LiteralBoolean() { }
+
+absl::StatusOr<std::shared_ptr<arrow::Array>> LiteralBoolean::Evaluate(const std::shared_ptr<arrow::RecordBatch> input) {
+  arrow::BooleanBuilder builder;
+  for (int i = 0; i < input->num_rows(); i++) { builder.Append(val_); }
+
+  auto array = builder.Finish();
+  if (!array.ok()) { return absl::InternalError(array.status().detail()->ToString()); }
+  return *array;
+}
+
+std::string LiteralBoolean::ToString() { return "todo"; }
+
 BooleanExpression::BooleanExpression(
     std::shared_ptr<PhysicalExpression> left,
     absl::string_view op,
