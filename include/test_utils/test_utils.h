@@ -8,6 +8,7 @@
 #include <memory>
 
 #include "arrow/api.h"
+#include "physicalplan/physicalexpression.h"
 
 namespace toyquery {
 namespace testutils {
