@@ -229,16 +229,21 @@ TEST(LessThanExpressionTest, WorksCorrectly) {
       std::make_shared<LiteralLong>(101), std::make_shared<LiteralLong>(101), record_batch, /*expected_result=*/false);
 
   // strings
-  // compare_all_rows<LessThanExpression>(
-  //     std::make_shared<LiteralString>("hello"),
-  //     std::make_shared<LiteralString>("hello2"),
-  //     record_batch,
-  //     /*expected_result=*/true);
-  // compare_all_rows<LessThanExpression>(
-  //     std::make_shared<LiteralString>("hello"),
-  //     std::make_shared<LiteralString>("hello"),
-  //     record_batch,
-  //     /*expected_result=*/false);
+  compare_all_rows<LessThanExpression>(
+      std::make_shared<LiteralString>("hello"),
+      std::make_shared<LiteralString>("hello2"),
+      record_batch,
+      /*expected_result=*/true);
+  compare_all_rows<LessThanExpression>(
+      std::make_shared<LiteralString>("hello"),
+      std::make_shared<LiteralString>("hello"),
+      record_batch,
+      /*expected_result=*/false);
+  compare_all_rows<LessThanExpression>(
+      std::make_shared<LiteralString>("hello2"),
+      std::make_shared<LiteralString>("hello"),
+      record_batch,
+      /*expected_result=*/false);
 
   // double
   compare_all_rows<LessThanExpression>(
@@ -251,6 +256,144 @@ TEST(LessThanExpressionTest, WorksCorrectly) {
       std::make_shared<LiteralDouble>(1.11),
       record_batch,
       /*expected_result=*/false);
+}
+
+TEST(LessThanEqualsExpressionTest, WorksCorrectly) {
+  auto record_batch = GetDummyRecordBatch();
+
+  // ints
+  compare_all_rows<LessThanEqualsExpression>(
+      std::make_shared<LiteralLong>(101), std::make_shared<LiteralLong>(111), record_batch, /*expected_result=*/true);
+  compare_all_rows<LessThanEqualsExpression>(
+      std::make_shared<LiteralLong>(101), std::make_shared<LiteralLong>(90), record_batch, /*expected_result=*/false);
+  compare_all_rows<LessThanEqualsExpression>(
+      std::make_shared<LiteralLong>(101), std::make_shared<LiteralLong>(101), record_batch, /*expected_result=*/true);
+
+  // strings
+  compare_all_rows<LessThanEqualsExpression>(
+      std::make_shared<LiteralString>("hello"),
+      std::make_shared<LiteralString>("hello2"),
+      record_batch,
+      /*expected_result=*/true);
+  compare_all_rows<LessThanEqualsExpression>(
+      std::make_shared<LiteralString>("hello"),
+      std::make_shared<LiteralString>("hello"),
+      record_batch,
+      /*expected_result=*/true);
+  compare_all_rows<LessThanEqualsExpression>(
+      std::make_shared<LiteralString>("hello2"),
+      std::make_shared<LiteralString>("hello"),
+      record_batch,
+      /*expected_result=*/false);
+
+  // double
+  compare_all_rows<LessThanEqualsExpression>(
+      std::make_shared<LiteralDouble>(1.11),
+      std::make_shared<LiteralDouble>(1.12),
+      record_batch,
+      /*expected_result=*/true);
+  compare_all_rows<LessThanEqualsExpression>(
+      std::make_shared<LiteralDouble>(1.11),
+      std::make_shared<LiteralDouble>(1.11),
+      record_batch,
+      /*expected_result=*/true);
+  compare_all_rows<LessThanEqualsExpression>(
+      std::make_shared<LiteralDouble>(1.11),
+      std::make_shared<LiteralDouble>(1.10),
+      record_batch,
+      /*expected_result=*/false);
+}
+
+TEST(GreaterThanExpressionTest, WorksCorrectly) {
+  auto record_batch = GetDummyRecordBatch();
+
+  // ints
+  compare_all_rows<GreaterThanExpression>(
+      std::make_shared<LiteralLong>(101), std::make_shared<LiteralLong>(111), record_batch, /*expected_result=*/false);
+  compare_all_rows<GreaterThanExpression>(
+      std::make_shared<LiteralLong>(101), std::make_shared<LiteralLong>(90), record_batch, /*expected_result=*/true);
+  compare_all_rows<GreaterThanExpression>(
+      std::make_shared<LiteralLong>(101), std::make_shared<LiteralLong>(101), record_batch, /*expected_result=*/false);
+
+  // strings
+  compare_all_rows<GreaterThanExpression>(
+      std::make_shared<LiteralString>("hello"),
+      std::make_shared<LiteralString>("hello2"),
+      record_batch,
+      /*expected_result=*/false);
+  compare_all_rows<GreaterThanExpression>(
+      std::make_shared<LiteralString>("hello"),
+      std::make_shared<LiteralString>("hello"),
+      record_batch,
+      /*expected_result=*/false);
+  compare_all_rows<GreaterThanExpression>(
+      std::make_shared<LiteralString>("hello2"),
+      std::make_shared<LiteralString>("hello"),
+      record_batch,
+      /*expected_result=*/true);
+
+  // double
+  compare_all_rows<GreaterThanExpression>(
+      std::make_shared<LiteralDouble>(1.11),
+      std::make_shared<LiteralDouble>(1.12),
+      record_batch,
+      /*expected_result=*/false);
+  compare_all_rows<GreaterThanExpression>(
+      std::make_shared<LiteralDouble>(1.11),
+      std::make_shared<LiteralDouble>(1.11),
+      record_batch,
+      /*expected_result=*/false);
+  compare_all_rows<GreaterThanExpression>(
+      std::make_shared<LiteralDouble>(1.11),
+      std::make_shared<LiteralDouble>(1.10),
+      record_batch,
+      /*expected_result=*/true);
+}
+
+TEST(GreaterThanEqualsExpressionTest, WorksCorrectly) {
+  auto record_batch = GetDummyRecordBatch();
+
+  // ints
+  compare_all_rows<GreaterThanEqualsExpression>(
+      std::make_shared<LiteralLong>(101), std::make_shared<LiteralLong>(111), record_batch, /*expected_result=*/false);
+  compare_all_rows<GreaterThanEqualsExpression>(
+      std::make_shared<LiteralLong>(101), std::make_shared<LiteralLong>(90), record_batch, /*expected_result=*/true);
+  compare_all_rows<GreaterThanEqualsExpression>(
+      std::make_shared<LiteralLong>(101), std::make_shared<LiteralLong>(101), record_batch, /*expected_result=*/true);
+
+  // strings
+  compare_all_rows<GreaterThanEqualsExpression>(
+      std::make_shared<LiteralString>("hello"),
+      std::make_shared<LiteralString>("hello2"),
+      record_batch,
+      /*expected_result=*/false);
+  compare_all_rows<GreaterThanEqualsExpression>(
+      std::make_shared<LiteralString>("hello"),
+      std::make_shared<LiteralString>("hello"),
+      record_batch,
+      /*expected_result=*/true);
+  compare_all_rows<GreaterThanEqualsExpression>(
+      std::make_shared<LiteralString>("hello2"),
+      std::make_shared<LiteralString>("hello"),
+      record_batch,
+      /*expected_result=*/true);
+
+  // double
+  compare_all_rows<GreaterThanEqualsExpression>(
+      std::make_shared<LiteralDouble>(1.11),
+      std::make_shared<LiteralDouble>(1.12),
+      record_batch,
+      /*expected_result=*/false);
+  compare_all_rows<GreaterThanEqualsExpression>(
+      std::make_shared<LiteralDouble>(1.11),
+      std::make_shared<LiteralDouble>(1.11),
+      record_batch,
+      /*expected_result=*/true);
+  compare_all_rows<GreaterThanEqualsExpression>(
+      std::make_shared<LiteralDouble>(1.11),
+      std::make_shared<LiteralDouble>(1.10),
+      record_batch,
+      /*expected_result=*/true);
 }
 
 }  // namespace physicalplan

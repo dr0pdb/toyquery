@@ -196,7 +196,9 @@ absl::StatusOr<bool> LessThanExpression::EvaluateBooleanExpression(
       COMPARE_LESS_THAN_ARROW_SCALER(arrow::DoubleScalar);
     }
     case arrow::Type::STRING: {
-      COMPARE_LESS_THAN_ARROW_SCALER(arrow::StringScalar);
+      CAST_ARROW_SCALER_TO_TYPE_OR_RETURN(auto lv, arrow::StringScalar, left);
+      CAST_ARROW_SCALER_TO_TYPE_OR_RETURN(auto rv, arrow::StringScalar, right);
+      return lv->ToString() < rv->ToString();
     }
 
     default: return absl::InternalError("Unsupported left/right operand type for LessThan expression.");
@@ -229,7 +231,9 @@ absl::StatusOr<bool> LessThanEqualsExpression::EvaluateBooleanExpression(
       COMPARE_LESS_THAN_EQUALS_ARROW_SCALER(arrow::DoubleScalar);
     }
     case arrow::Type::STRING: {
-      COMPARE_LESS_THAN_EQUALS_ARROW_SCALER(arrow::StringScalar);
+      CAST_ARROW_SCALER_TO_TYPE_OR_RETURN(auto lv, arrow::StringScalar, left);
+      CAST_ARROW_SCALER_TO_TYPE_OR_RETURN(auto rv, arrow::StringScalar, right);
+      return lv->ToString() <= rv->ToString();
     }
 
     default: return absl::InternalError("Unsupported left/right operand type for LessThanEquals expression.");
@@ -262,7 +266,9 @@ absl::StatusOr<bool> GreaterThanExpression::EvaluateBooleanExpression(
       COMPARE_GREATER_THAN_ARROW_SCALER(arrow::DoubleScalar);
     }
     case arrow::Type::STRING: {
-      COMPARE_GREATER_THAN_ARROW_SCALER(arrow::StringScalar);
+      CAST_ARROW_SCALER_TO_TYPE_OR_RETURN(auto lv, arrow::StringScalar, left);
+      CAST_ARROW_SCALER_TO_TYPE_OR_RETURN(auto rv, arrow::StringScalar, right);
+      return lv->ToString() > rv->ToString();
     }
 
     default: return absl::InternalError("Unsupported left/right operand type for GreaterThan expression.");
@@ -295,7 +301,9 @@ absl::StatusOr<bool> GreaterThanEqualsExpression::EvaluateBooleanExpression(
       COMPARE_GREATER_THAN_EQUALS_ARROW_SCALER(arrow::DoubleScalar);
     }
     case arrow::Type::STRING: {
-      COMPARE_GREATER_THAN_EQUALS_ARROW_SCALER(arrow::StringScalar);
+      CAST_ARROW_SCALER_TO_TYPE_OR_RETURN(auto lv, arrow::StringScalar, left);
+      CAST_ARROW_SCALER_TO_TYPE_OR_RETURN(auto rv, arrow::StringScalar, right);
+      return lv->ToString() >= rv->ToString();
     }
 
     default: return absl::InternalError("Unsupported left/right operand type for GreaterThanEquals expression.");
