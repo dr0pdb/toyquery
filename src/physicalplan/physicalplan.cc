@@ -11,6 +11,12 @@ namespace physicalplan {
 
 using toyquery::common::GetMessageFromStatus;
 
+Scan::Scan(std::shared_ptr<DataSource> data_source, std::vector<std::string> projection)
+    : data_source_{ std::move(data_source) },
+      projection_{ projection } { }
+
+Scan::~Scan() { }
+
 absl::StatusOr<std::shared_ptr<arrow::Schema>> Scan::Schema() {
   ASSIGN_OR_RETURN(auto schema, data_source_->Schema());
   if (projection_.empty()) return schema;
@@ -32,6 +38,16 @@ absl::StatusOr<std::shared_ptr<arrow::RecordBatch>> Scan::Next() {
 
 std::string Scan::ToString() { return "todo"; }
 
+Projection::Projection(
+    std::shared_ptr<PhysicalPlan> input,
+    std::shared_ptr<arrow::Schema> schema,
+    std::vector<std::shared_ptr<PhysicalExpression>> projection)
+    : input_{ input },
+      schema_{ schema },
+      projection_{ projection } { }
+
+Projection::~Projection() { }
+
 absl::StatusOr<std::shared_ptr<arrow::Schema>> Projection::Schema() { return schema_; }
 
 std::vector<std::shared_ptr<PhysicalPlan>> Projection::Children() { return { input_ }; }
@@ -51,6 +67,12 @@ absl::StatusOr<std::shared_ptr<arrow::RecordBatch>> Projection::Next() {
 }
 
 std::string Projection::ToString() { return "todo"; }
+
+Selection::Selection(std::shared_ptr<PhysicalPlan> input, std::shared_ptr<PhysicalExpression> predicate)
+    : input_{ input },
+      predicate_{ predicate } { }
+
+Selection::~Selection() { }
 
 absl::StatusOr<std::shared_ptr<arrow::Schema>> Selection::Schema() { return input_->Schema(); }
 
@@ -111,6 +133,18 @@ absl::StatusOr<std::shared_ptr<arrow::Array>> Selection::filterColumn(
 }
 
 std::string Selection::ToString() { return "todo"; }
+
+HashAggregation::HashAggregation(
+    std::shared_ptr<PhysicalPlan> input,
+    std::shared_ptr<arrow::Schema> schema,
+    std::vector<std::shared_ptr<PhysicalExpression>> grouping_expressions,
+    std::vector<std::shared_ptr<AggregationExpression>> aggregation_expressions)
+    : input_{ input },
+      schema_{ schema },
+      grouping_expressions_{ grouping_expressions },
+      aggregation_expressions_{ aggregation_expressions } { }
+
+HashAggregation::~HashAggregation() {}
 
 absl::StatusOr<std::shared_ptr<arrow::Schema>> HashAggregation::Schema() { return schema_; }
 

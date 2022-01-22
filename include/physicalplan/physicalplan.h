@@ -80,10 +80,7 @@ class PhysicalPlan {
  */
 class Scan : public PhysicalPlan {
  public:
-  Scan(std::shared_ptr<DataSource> data_source, std::vector<std::string> projection)
-      : data_source_{ std::move(data_source) },
-        projection_{ projection } { }
-
+  Scan(std::shared_ptr<DataSource> data_source, std::vector<std::string> projection);
   ~Scan() override;
 
   /**
@@ -128,10 +125,7 @@ class Projection : public PhysicalPlan {
   Projection(
       std::shared_ptr<PhysicalPlan> input,
       std::shared_ptr<arrow::Schema> schema,
-      std::vector<std::shared_ptr<PhysicalExpression>> projection)
-      : input_{ input },
-        schema_{ schema },
-        projection_{ projection } { }
+      std::vector<std::shared_ptr<PhysicalExpression>> projection);
 
   ~Projection() override;
 
@@ -174,10 +168,7 @@ class Projection : public PhysicalPlan {
  */
 class Selection : public PhysicalPlan {
  public:
-  Selection(std::shared_ptr<PhysicalPlan> input, std::shared_ptr<PhysicalExpression> predicate)
-      : input_{ input },
-        predicate_{ predicate } { }
-
+  Selection(std::shared_ptr<PhysicalPlan> input, std::shared_ptr<PhysicalExpression> predicate);
   ~Selection() override;
 
   /**
@@ -210,10 +201,10 @@ class Selection : public PhysicalPlan {
       std::shared_ptr<arrow::Array> data,
       std::shared_ptr<arrow::BooleanArray> predicate);
 
-  DISALLOW_COPY_AND_ASSIGN(Selection);
-
   std::shared_ptr<PhysicalPlan> input_;
   std::shared_ptr<PhysicalExpression> predicate_;
+
+  DISALLOW_COPY_AND_ASSIGN(Selection);
 };
 
 /**
@@ -226,12 +217,7 @@ class HashAggregation : public PhysicalPlan {
       std::shared_ptr<PhysicalPlan> input,
       std::shared_ptr<arrow::Schema> schema,
       std::vector<std::shared_ptr<PhysicalExpression>> grouping_expressions,
-      std::vector<std::shared_ptr<AggregationExpression>> aggregation_expressions)
-      : input_{ input },
-        schema_{ schema },
-        grouping_expressions_{ grouping_expressions },
-        aggregation_expressions_{ aggregation_expressions } { }
-
+      std::vector<std::shared_ptr<AggregationExpression>> aggregation_expressions);
   ~HashAggregation() override;
 
   /**
@@ -262,8 +248,6 @@ class HashAggregation : public PhysicalPlan {
  private:
   absl::StatusOr<std::vector<std::shared_ptr<arrow::RecordBatch>>> getAllInputBatches();
 
-  DISALLOW_COPY_AND_ASSIGN(HashAggregation);
-
   std::shared_ptr<PhysicalPlan> input_;
   std::shared_ptr<arrow::Schema> schema_;
   std::vector<std::shared_ptr<PhysicalExpression>> grouping_expressions_;
@@ -271,6 +255,8 @@ class HashAggregation : public PhysicalPlan {
 
   std::unique_ptr<arrow::TableBatchReader> batch_reader_;
   std::shared_ptr<arrow::Table> processed_table_;
+
+  DISALLOW_COPY_AND_ASSIGN(HashAggregation);
 };
 
 }  // namespace physicalplan
