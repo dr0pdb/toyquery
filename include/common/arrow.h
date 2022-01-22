@@ -11,6 +11,11 @@
 namespace toyquery {
 
 /**
+ * @brief The acceptable error margin for double precision calculations.
+ */
+static constexpr double DOUBLE_ACCEPTED_MARGIN = 0.000001;
+
+/**
  * @brief Filter an arrow::Schema using the given projection
  *
  * @param schema: the original schema

@@ -1,5 +1,7 @@
 #include "physicalplan/physicalexpression.h"
 
+#include "fmt/core.h"
+
 namespace toyquery {
 namespace physicalplan {
 
@@ -363,7 +365,7 @@ absl::StatusOr<std::shared_ptr<arrow::Array>> MathExpression::EvaluateBinaryExpr
     case arrow::Type::DOUBLE: {
       EVALUATE_BINARY_EXPRESSION(arrow::DoubleBuilder, arrow::DoubleScalar);
     }
-    default: return absl::InternalError("Unsupported type in math expression.");
+    default: return absl::InternalError(fmt::format("Unsupported type {} in math expression.", left->type()->ToString()));
   }
 #undef EVALUATE_BINARY_EXPRESSION
 }

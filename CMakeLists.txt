@@ -159,6 +159,7 @@ include(cmake/Doxygen.cmake)
 
 add_subdirectory(ext/abseil-cpp)
 add_subdirectory(ext/glog)
+add_subdirectory(ext/fmt-8.1.1)
 find_package(Arrow)
 
 target_link_libraries(
@@ -171,6 +172,7 @@ target_link_libraries(
     absl::statusor
     arrow_shared
     glog::glog
+    fmt::fmt
 )
 
 verbose_message("Installed Apache Arrow version ${ARROW_VERSION}.\n")
