@@ -25,13 +25,14 @@ jobs:
           path: ${{ github.workspace }}/${{ env.INSTALL_LOCATION }}
           key: ${{ runner.os }}-dependencies
 
-      - name: setup Abseil and Glog
+      - name: setup Abseil, Glog and Fmt
         if: ${{ steps.cache.output.cache-hit != 'true' }}
         run: |
           mkdir ext
           cd ext
           git clone https://github.com/abseil/abseil-cpp --branch lts_2021_11_02
           git clone https://github.com/google/glog.git --branch v0.5.0
+          git clone https://github.com/fmtlib/fmt.git fmt-8.1.1  --branch 8.1.1
 
       - name: install GoogleTest
         if: ${{ steps.cache.output.cache-hit != 'true' }}
