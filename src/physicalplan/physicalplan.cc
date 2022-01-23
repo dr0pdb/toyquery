@@ -11,6 +11,8 @@ namespace physicalplan {
 
 using toyquery::common::GetMessageFromStatus;
 
+PhysicalPlan::~PhysicalPlan() { }
+
 Scan::Scan(std::shared_ptr<DataSource> data_source, std::vector<std::string> projection)
     : data_source_{ std::move(data_source) },
       projection_{ projection } { }
@@ -20,7 +22,7 @@ Scan::~Scan() { }
 absl::StatusOr<std::shared_ptr<arrow::Schema>> Scan::Schema() {
   ASSIGN_OR_RETURN(auto schema, data_source_->Schema());
   if (projection_.empty()) return schema;
-  return FilterSchema(schema, projection_);
+  return toyquery::FilterSchema(schema, projection_);
 }
 
 std::vector<std::shared_ptr<PhysicalPlan>> Scan::Children() { return {}; }
@@ -56,6 +58,7 @@ absl::Status Projection::Prepare() { return input_->Prepare(); }
 
 absl::StatusOr<std::shared_ptr<arrow::RecordBatch>> Projection::Next() {
   ASSIGN_OR_RETURN(auto batch, input_->Next());
+  if (batch == nullptr) return nullptr;  // end of stream.
 
   std::vector<std::shared_ptr<arrow::Array>> columns;
   for (auto& expr : projection_) {
@@ -82,6 +85,8 @@ absl::Status Selection::Prepare() { return input_->Prepare(); }
 
 absl::StatusOr<std::shared_ptr<arrow::RecordBatch>> Selection::Next() {
   ASSIGN_OR_RETURN(auto batch, input_->Next());
+  if (batch == nullptr) return nullptr;  // end of stream.
+
   ASSIGN_OR_RETURN(auto schema, input_->Schema());
 
   ASSIGN_OR_RETURN(auto filtering_result, predicate_->Evaluate(batch));
@@ -144,7 +149,7 @@ HashAggregation::HashAggregation(
       grouping_expressions_{ grouping_expressions },
       aggregation_expressions_{ aggregation_expressions } { }
 
-HashAggregation::~HashAggregation() {}
+HashAggregation::~HashAggregation() { }
 
 absl::StatusOr<std::shared_ptr<arrow::Schema>> HashAggregation::Schema() { return schema_; }
 

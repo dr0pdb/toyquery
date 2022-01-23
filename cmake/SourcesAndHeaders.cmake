@@ -1,4 +1,5 @@
 set(sources
+  src/common/arrow.cc
   src/common/status.cc
   src/dataframe/dataframe.cc
   src/datasource/datasource.cc

@@ -29,7 +29,6 @@ using ::toyquery::datasource::DataSource;
 class PhysicalPlan {
  public:
   PhysicalPlan() = default;
-
   virtual ~PhysicalPlan() = 0;
 
   /**
@@ -59,7 +58,7 @@ class PhysicalPlan {
    *
    * @return absl::StatusOr<std::shared_ptr<arrow::RecordBatch>>: the next record batch if successful. Error status
    * otherwise.
-   * @note The absl::NotFoundError indicates that all batches have been emitted. TODO: rethink this.
+   * @note Returns nullptr when the stream ends.
    */
   virtual absl::StatusOr<std::shared_ptr<arrow::RecordBatch>> Next() = 0;
 
@@ -68,7 +67,7 @@ class PhysicalPlan {
    *
    * @return std::string: the string representation of the expression.
    */
-  virtual std::string ToString();
+  virtual std::string ToString() = 0;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(PhysicalPlan);
