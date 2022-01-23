@@ -85,12 +85,18 @@ void compareRecordBatchStreamWithExpectedTable(
   auto batch = plan->Next();
   EXPECT_TRUE(batch.ok());
 
+  std::cout << "before while loop" << std::endl;
+
   while (batch.ok() && (*batch) != nullptr) {
     result_data_batches.push_back(*batch);
+
+    std::cout << "batch value: " << (*batch)->ToString() << std::endl;
 
     batch = plan->Next();
     EXPECT_TRUE(batch.ok());
   }
+
+  std::cout << "out of the while loop" << std::endl;
 
   auto result_data = arrow::Table::FromRecordBatches(result_data_batches);
   EXPECT_TRUE(result_data.ok()) << fmt::format("creating result data failed with error {}", result_data.status().message());
