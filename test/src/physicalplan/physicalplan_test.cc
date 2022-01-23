@@ -17,6 +17,8 @@ using ::toyquery::testutils::CompareArrowTableAndPrintDebugInfo;
 using ::toyquery::testutils::GetTestData;
 using ::toyquery::testutils::GetTestSchema;
 using ::toyquery::testutils::GetTestSchemaWithIdAndNameColumns;
+using ::toyquery::testutils::ID_COLUMN;
+using ::toyquery::testutils::NAME_COLUMN;
 
 class PhysicalPlanTest : public ::testing::Test {
  protected:
@@ -31,8 +33,19 @@ class PhysicalPlanTest : public ::testing::Test {
     return std::make_shared<Scan>(data_source_, projection);
   }
 
+  std::shared_ptr<Projection> getProjectionPlan() {
+    auto scan = getScanPlan();
+    std::vector<std::shared_ptr<PhysicalExpression>> projection = { std::make_shared<Column>(ID_COLUMN),
+                                                                    std::make_shared<Column>(NAME_COLUMN) };
+    return std::make_shared<Projection>(scan, GetTestSchemaWithIdAndNameColumns(), projection);
+  }
+
   std::shared_ptr<CsvDataSource> data_source_;
 };
+
+//
+// Scan tests
+//
 
 TEST_F(PhysicalPlanTest, ScanHasCorrectSchema) {
   auto scan = getScanPlan();
@@ -72,7 +85,7 @@ void compareRecordBatchStreamWithExpectedTable(
   auto batch = plan->Next();
   EXPECT_TRUE(batch.ok());
 
-  while ((*batch) != nullptr) {
+  while (batch.ok() && (*batch) != nullptr) {
     result_data_batches.push_back(*batch);
 
     batch = plan->Next();
@@ -93,6 +106,10 @@ TEST_F(PhysicalPlanTest, ScanReturnsCorrectData) {
       "unexpected error in the prepare call for scan with message {}", prepare_status.message());
   compareRecordBatchStreamWithExpectedTable(scan, expected_data);
 }
+
+//
+// Projection tests
+//
 
 }  // namespace physicalplan
 }  // namespace toyquery
